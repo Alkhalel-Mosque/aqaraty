@@ -6,23 +6,21 @@ class RealEstate {
   PropertyType? propertyType;
   String? locationArea;
   String? locationMark;
-  int? minPrice;
-  int? maxPrice;
+  int price;
   int? floor;
-  int? minRooms;
-  int? maxRooms;
+  int rooms;
   bool iswithSalon;
   bool iswithSofa;
-  int? minArea;
-  int? maxArea;
+  int? area;
   List<Direction>? direction;
   OwnershipType? ownershipType;
+  Condition? condition;
   String? customerName;
   String? customerPhone;
   String? officeName;
   String? officePhone;
   Furnishing? furnishing;
-  bool? isOffice;
+  bool isOffice;
   List<Features>? features;
   String? description;
   List<String>? gallary;
@@ -34,15 +32,13 @@ class RealEstate {
     this.propertyType,
     this.locationArea,
     this.locationMark,
-    this.minPrice,
-    this.maxPrice,
+    this.condition,
+    this.price = 0,
     this.floor,
-    this.minRooms,
-    this.maxRooms,
+    this.rooms = 0,
     this.iswithSalon = false,
     this.iswithSofa = false,
-    this.minArea,
-    this.maxArea,
+    this.area,
     this.direction,
     this.ownershipType,
     this.customerName,
@@ -58,28 +54,28 @@ class RealEstate {
   });
 
   String get getRoomsWithExtra {
-    String rooms;
-    if (minRooms == 1) {
-      rooms = "غرفة";
-    } else if (minRooms == 2) {
-      rooms = "غرفتين";
+    String room;
+    if (rooms == 1) {
+      room = "غرفة";
+    } else if (rooms == 2) {
+      room = "غرفتين";
     } else {
-      rooms = "$minRooms غرف";
+      room = "$rooms غرف";
     }
     if (iswithSalon) {
-      rooms += " + صالون";
+      room += " + صالون";
     }
     if (iswithSofa) {
-      rooms += " + صوفا";
+      room += " + صوفا";
     }
-    return rooms;
+    return room;
   }
 
   static RegExp reg = RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))');
   String mathFunc(Match match) => '${match[1]},';
 
   String get getPrice =>
-      "${minPrice.toString().replaceAllMapped(reg, mathFunc)} ل.س";
+      "${price.toString().replaceAllMapped(reg, mathFunc)} ل.س";
   String get getFloor => ordinalsAr(floor!);
 }
 
@@ -89,10 +85,10 @@ final realesatateSample = RealEstate(
   propertyType: PropertyType.apartment,
   locationArea: "مساكن برزة",
   locationMark: "حلف الجامع",
-  minPrice: 20000000000,
+  price: 20000000000,
   floor: 9,
   iswithSalon: true,
-  minRooms: 2,
+  rooms: 2,
   direction: [Direction.east, Direction.north],
   ownershipType: OwnershipType.housingTitle,
   customerName: "ابو علي",

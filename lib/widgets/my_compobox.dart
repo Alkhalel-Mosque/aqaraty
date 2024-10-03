@@ -41,6 +41,7 @@ class _MyComboBoxState extends State<MyComboBox> {
             borderRadius: BorderRadius.all(Radius.circular(15))),
       ),
       width: MediaQuery.of(context).size.width / 2,
+      menuHeight: MediaQuery.of(context).size.height / 2,
       hintText: widget.hint,
       enabled: widget.enabled,
       textStyle: const TextStyle(),
