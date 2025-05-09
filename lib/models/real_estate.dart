@@ -25,6 +25,7 @@ class RealEstate {
   String? description;
   List<String>? gallary;
   int? createdBy;
+  RequestStatus? requestStatus;
 
   RealEstate({
     this.id,

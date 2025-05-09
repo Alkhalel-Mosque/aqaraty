@@ -168,3 +168,17 @@ enum Features {
     };
   }
 }
+
+enum RequestStatus {
+  pending,
+  complete,
+  canceled,
+
+  String get arName {
+    return switch (this) {
+      pending => "معلق",
+      complete => "مكتمل",
+      canceled => "ملغى",
+    };
+  }
+}
