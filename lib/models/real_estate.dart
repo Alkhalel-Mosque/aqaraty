@@ -1,3 +1,5 @@
+import 'package:parse_server_sdk_flutter/parse_server_sdk_flutter.dart';
+
 import '../enums/enums.dart';
 
 class RealEstate {
@@ -52,7 +54,66 @@ class RealEstate {
     this.description,
     this.gallary,
     this.createdBy,
+    this.requestStatus=RequestStatus.pending,
   });
+
+  Future<ParseObject> realEstateToParseObject(RealEstate realEstate) async {
+    // Create the base ParseObject
+    final parseObject = ParseObject('real_estate');
+
+    // Convert enum values to strings
+    final typeString = realEstate.type?.toString().split('.').last;
+    final propertyTypeString =
+        realEstate.propertyType?.toString().split('.').last;
+    final ownershipTypeString =
+        realEstate.ownershipType?.toString().split('.').last;
+    final conditionString = realEstate.condition?.toString().split('.').last;
+    final furnishingString = realEstate.furnishing?.toString().split('.').last;
+    final requestStatusString =
+        RequestStatus.pending.toString().split('.').last;
+
+    // Convert directions to ParseArray
+    final directionsArray = realEstate.direction
+        ?.map((dir) => dir.toString().split('.').last)
+        .toList();
+
+    // Convert features to ParseArray
+    final featuresArray = realEstate.features
+        ?.map((feature) => feature.toString().split('.').last)
+        .toList();
+
+    // Set all properties
+    parseObject.set<String?>('type', typeString);
+    parseObject.set<String?>('propertyType', propertyTypeString);
+    parseObject.set<String?>('locationArea', realEstate.locationArea);
+    parseObject.set<String?>('locationMark', realEstate.locationMark);
+    parseObject.set<int?>('price', realEstate.price);
+    parseObject.set<int?>('floor', realEstate.floor);
+    parseObject.set<int?>('rooms', realEstate.rooms);
+    parseObject.set<bool?>('iswithSalon', realEstate.iswithSalon);
+    parseObject.set<bool?>('iswithSofa', realEstate.iswithSofa);
+    parseObject.set<int?>('area', realEstate.area);
+    parseObject.set<List?>('direction', directionsArray);
+    parseObject.set<String?>('ownershipType', ownershipTypeString);
+    parseObject.set<String?>('condition', conditionString);
+    parseObject.set<String?>('customerName', realEstate.customerName);
+    parseObject.set<String?>('customerPhone', realEstate.customerPhone);
+    parseObject.set<String?>('officeName', realEstate.officeName);
+    parseObject.set<String?>('officePhone', realEstate.officePhone);
+    parseObject.set<String?>('furnishing', furnishingString);
+    parseObject.set<bool?>('isOffice', realEstate.isOffice);
+    parseObject.set<List?>('features', featuresArray);
+    parseObject.set<String?>('description', realEstate.description);
+    parseObject.set<List?>('gallary', realEstate.gallary);
+    parseObject.set<String?>('requestStatus', requestStatusString);
+    final ParseUser currentUser = await ParseUser.currentUser() as ParseUser;
+    parseObject.set('user', currentUser.toPointer());
+
+    parseObject.addRelation('createdBy', [currentUser]);
+    print(parseObject);
+
+    return parseObject;
+  }
 
   String get getRoomsWithExtra {
     String room;

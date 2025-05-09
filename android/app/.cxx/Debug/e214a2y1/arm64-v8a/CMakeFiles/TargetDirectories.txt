@@ -1,0 +1,2 @@
+C:/aqaraty/android/app/.cxx/Debug/e214a2y1/arm64-v8a/CMakeFiles/edit_cache.dir
+C:/aqaraty/android/app/.cxx/Debug/e214a2y1/arm64-v8a/CMakeFiles/rebuild_cache.dir

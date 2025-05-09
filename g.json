@@ -1,0 +1,63 @@
+{
+    "className": "real_estate",
+    "type": "sell",
+    "propertyType": "apartment",
+    "locationArea": "asdasd",
+    "locationMark": "sadasd",
+    "price": {
+        "className": "ParseNumber",
+        "estimateNumber": 220,
+        "savedNumber": 0.0,
+        "setMode": true,
+        "lastPreformedOperation": null
+    },
+    "floor": {
+        "className": "ParseNumber",
+        "estimateNumber": 5,
+        "savedNumber": 0.0,
+        "setMode": true,
+        "lastPreformedOperation": null
+    },
+    "rooms": {
+        "className": "ParseNumber",
+        "estimateNumber": 5,
+        "savedNumber": 0.0,
+        "setMode": true,
+        "lastPreformedOperation": null
+    },
+    "iswithSalon": true,
+    "iswithSofa": false,
+    "area": {
+        "className": "ParseNumber",
+        "estimateNumber": 100,
+        "savedNumber": 0.0,
+        "setMode": true,
+        "lastPreformedOperation": null
+    },
+    "direction": {
+        "className": "ParseArray",
+        "estimatedArray": [
+            "west",
+            "east"
+        ],
+        "savedArray": [],
+        "lastPreformedOperation": null
+    },
+    "ownershipType": "sharesTitle",
+    "condition": "neW",
+    "customerName": "asdasd",
+    "customerPhone": "4659574954",
+    "officeName": null,
+    "officePhone": null,
+    "furnishing": "semi",
+    "isOffice": false,
+    "features": {
+        "className": "ParseArray",
+        "estimatedArray": [],
+        "savedArray": [],
+        "lastPreformedOperation": null
+    },
+    "description": null,
+    "gallary": null,
+    "requestStatus": null
+}
