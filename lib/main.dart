@@ -8,6 +8,7 @@ void main() {
 }
 
 initialServer() async {
+  WidgetsFlutterBinding.ensureInitialized();
   const keyApplicationId = 'hhfftwGWHUZ4xDgoEveepbg8D25dUZqMDQJtvRp7';
   const keyClientKey = 'FOGdXmYSVKCLvyWFahPPUad64IgiLKAORrg68Z5G';
   const keyParseServerUrl = 'https://parseapi.back4app.com';
