@@ -94,13 +94,24 @@ enum Condition {
   old,
   structureOnly;
 
+  static Condition getFromString(String string) {
+    return switch (string) {
+      "سوبر ديلوكس" => Condition.superDeluxe,
+      "جديدة" => Condition.neW,
+      "جيدة" => Condition.good,
+      "قديمة" => Condition.old,
+      "على العظم" => Condition.structureOnly,
+      _ => throw ArgumentError('Unknown condition string: $string'),
+    };
+  }
+
   String get arName {
     return switch (this) {
-      superDeluxe => "سوبر ديلوكس",
-      neW => "جديدة",
-      good => "جيدة",
-      old => "قديمة",
-      structureOnly => "على العظم",
+      Condition.superDeluxe => "سوبر ديلوكس",
+      Condition.neW => "جديدة",
+      Condition.good => "جيدة",
+      Condition.old => "قديمة",
+      Condition.structureOnly => "على العظم",
     };
   }
 }
@@ -112,13 +123,24 @@ enum PropertyType {
   farm,
   villa;
 
+  static PropertyType getFromString(String string) {
+    return switch (string) {
+      "شقة" => PropertyType.apartment,
+      "محل" => PropertyType.shop,
+      "مكتب" => PropertyType.office,
+      "مزرعة" => PropertyType.farm,
+      "فيلا" => PropertyType.villa,
+      _ => throw ArgumentError('Unknown property type string: $string'),
+    };
+  }
+
   String get arName {
     return switch (this) {
-      apartment => "شقة",
-      shop => "محل",
-      office => "مكتب",
-      farm => "مزرعة",
-      villa => "فيلا",
+      PropertyType.apartment => "شقة",
+      PropertyType.shop => "محل",
+      PropertyType.office => "مكتب",
+      PropertyType.farm => "مزرعة",
+      PropertyType.villa => "فيلا",
     };
   }
 }
@@ -134,17 +156,32 @@ enum OwnershipType {
   govermentProperty,
   temporaryRegister;
 
+  static OwnershipType getFromString(String string) {
+    return switch (string.trim()) {  // Added trim() to handle whitespace
+      "طابو إسكان" => OwnershipType.housingTitle,
+      "طابو أسهم" => OwnershipType.sharesTitle,
+      "طابو أخضر" => OwnershipType.greenTitle,
+      "حكم محكمة" => OwnershipType.courtJudgement,
+      "عقد بيع قطعي" => OwnershipType.outrightSellContract,
+      "طابو زراعي" => OwnershipType.agriculturalTitle,
+      "فروغ" => OwnershipType.rightOfUse,
+      "أملاك دولة" => OwnershipType.govermentProperty,
+      "سجل مؤقت" => OwnershipType.temporaryRegister,
+      _ => throw ArgumentError('Unknown ownership type string: $string'),
+    };
+  }
+
   String get arName {
     return switch (this) {
-      housingTitle => " طابو إسكان",
-      sharesTitle => " طابو أسهم",
-      greenTitle => "طابو أخضر",
-      courtJudgement => "حكم محكمة",
-      outrightSellContract => "عقد بيع قطعي",
-      agriculturalTitle => "طابو زراعي",
-      rightOfUse => "فروغ",
-      govermentProperty => "أملاك دولة",
-      temporaryRegister => "سجل مؤقت",
+      OwnershipType.housingTitle => "طابو إسكان",
+      OwnershipType.sharesTitle => "طابو أسهم",
+      OwnershipType.greenTitle => "طابو أخضر",
+      OwnershipType.courtJudgement => "حكم محكمة",
+      OwnershipType.outrightSellContract => "عقد بيع قطعي",
+      OwnershipType.agriculturalTitle => "طابو زراعي",
+      OwnershipType.rightOfUse => "فروغ",
+      OwnershipType.govermentProperty => "أملاك دولة",
+      OwnershipType.temporaryRegister => "سجل مؤقت",
     };
   }
 }
@@ -165,6 +202,20 @@ enum Features {
       elevator => "مصعد",
       parking => "مرآب",
       pool => "مسبح",
+    };
+  }
+}
+
+enum RequestStatus {
+  pending,
+  complete,
+  canceled;
+
+  String get arName {
+    return switch (this) {
+      pending => "معلق",
+      complete => "مكتمل",
+      canceled => "ملغى",
     };
   }
 }

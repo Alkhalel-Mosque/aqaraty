@@ -1,13 +1,14 @@
-import 'package:aqaraty/enums/enums.dart';
-import 'package:aqaraty/extensions/extension.dart';
-import 'package:aqaraty/models/real_estate.dart';
-import 'package:aqaraty/pages/home_page.dart';
-import 'package:aqaraty/utils/toast.dart';
-import 'package:aqaraty/widgets/column_checkbox.dart';
-import 'package:aqaraty/widgets/my_checkbox.dart';
-import 'package:aqaraty/widgets/my_compobox.dart';
-import 'package:aqaraty/widgets/my_text_button.dart';
-import 'package:aqaraty/widgets/my_text_form_field.dart';
+import 'package:aqaraty/api/api.dart';
+import '../../enums/enums.dart';
+import '../../extensions/extension.dart';
+import '../../models/real_estate.dart';
+import '../../pages/home_page.dart';
+import '../../utils/toast.dart';
+import '../../widgets/column_checkbox.dart';
+import '../../widgets/my_checkbox.dart';
+import '../../widgets/my_compobox.dart';
+import '../../widgets/my_text_button.dart';
+import '../../widgets/my_text_form_field.dart';
 import 'package:flutter/material.dart';
 
 class AddPage extends StatefulWidget {
@@ -74,6 +75,7 @@ class _AddPageState extends State<AddPage> {
     }
 
     data.add(realEstate);
+    Api().addRealEstate(realEstate);
   }
 
   @override
@@ -99,7 +101,7 @@ class _AddPageState extends State<AddPage> {
             MyComboBox(
               text: "نوع العقار",
               onChanged: (p0) {
-                // realEstate.propertyType = PropertyType.getFromString(p0!);
+                realEstate.propertyType = PropertyType.getFromString(p0!);
                 setState(() {});
               },
               items: PropertyType.values.map((e) => e.arName).toList(),
@@ -110,23 +112,37 @@ class _AddPageState extends State<AddPage> {
               onChanged: (p0) => realEstate.locationArea = p0,
             ),
             10.getHightSizedBox,
-            MyTextFormField(labelText: "علامة"),
+            MyTextFormField(
+              labelText: "علامة",
+              onChanged: (p0) => realEstate.locationMark = p0,
+            ),
             10.getHightSizedBox,
             MyTextFormField(
               labelText: "السعر المتوقع",
               textInputType: TextInputType.number,
+              onChanged: (p0) {
+                realEstate.price = int.parse(p0);
+              },
               maximum: 14,
             ),
             10.getHightSizedBox,
             MyComboBox(
               text: "الطابق",
               items: List.generate(18, (index) => ordinalsAr(index - 2)),
+              onChanged: (p0) {
+                //TODO:
+                realEstate.floor = 5;
+                setState(() {});
+              },
             ),
             10.getHightSizedBox,
             MyTextFormField(
               labelText: "عدد الغرف",
               textInputType: TextInputType.number,
               maximum: 1,
+              onChanged: (p0) {
+                realEstate.rooms = int.parse(p0);
+              },
             ),
             5.getHightSizedBox,
             Row(
@@ -159,6 +175,9 @@ class _AddPageState extends State<AddPage> {
               labelText: "المساحة",
               textInputType: TextInputType.number,
               maximum: 5,
+              onChanged: (p0) {
+                realEstate.area = int.parse(p0);
+              },
             ),
             5.getHightSizedBox,
             Card(
@@ -195,16 +214,28 @@ class _AddPageState extends State<AddPage> {
               MyComboBox(
                 text: "نوع الملكية",
                 items: OwnershipType.values.map((e) => e.arName).toList(),
+                onChanged: (p0) {
+                  realEstate.ownershipType = OwnershipType.getFromString(p0!);
+                  setState(() {});
+                },
               ),
             if (realEstate.type?.isBuyOrSell ?? false) 10.getHightSizedBox,
             MyComboBox(
               text: "الإكساء",
               items: Condition.values.map((e) => e.arName).toList(),
+              onChanged: (p0) {
+                realEstate.condition = Condition.getFromString(p0!);
+                setState(() {});
+              },
             ),
             10.getHightSizedBox,
             MyComboBox(
               text: "الفرش",
               items: Furnishing.values.map((e) => e.arName).toList(),
+              onChanged: (p0) {
+                realEstate.furnishing = Furnishing.getFromString(p0!);
+                setState(() {});
+              },
             ),
             5.getHightSizedBox,
             Card(
@@ -257,9 +288,19 @@ class _AddPageState extends State<AddPage> {
               textInputType: TextInputType.multiline,
             ),
             10.getHightSizedBox,
-            MyTextFormField(labelText: "اسم الزبون"),
+            MyTextFormField(
+              labelText: "اسم الزبون",
+              onChanged: (p0) {
+                realEstate.customerName = p0;
+              },
+            ),
             10.getHightSizedBox,
-            MyTextFormField(labelText: "رقم الزبون"),
+            MyTextFormField(
+              labelText: "رقم الزبون",
+              onChanged: (p0) {
+                realEstate.customerPhone = p0;
+              },
+            ),
             5.getHightSizedBox,
             MyCheckBox(
               val: realEstate.isOffice,

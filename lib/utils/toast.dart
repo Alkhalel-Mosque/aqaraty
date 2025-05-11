@@ -6,10 +6,11 @@ class CustomToast {
   static const String copySuccsed = "تم النسخ إلى الحافظة!";
 
   static showToast(String content) {
-    Fluttertoast.cancel();
-    Fluttertoast.showToast(
-      msg: content,
-      toastLength: Toast.LENGTH_LONG,
-    );
+    print(content);
+    // Fluttertoast.cancel();
+    // Fluttertoast.showToast(
+    //   msg: content,
+    //   toastLength: Toast.LENGTH_LONG,
+    // );
   }
 }

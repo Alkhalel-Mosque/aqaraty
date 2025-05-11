@@ -1,4 +1,4 @@
-import 'package:aqaraty/extensions/extension.dart';
+import '../../extensions/extension.dart';
 import 'package:flutter/material.dart';
 
 class MyButtonMenu extends StatelessWidget {

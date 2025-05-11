@@ -1,7 +1,7 @@
-import 'package:aqaraty/components/realestate_card.dart';
-import 'package:aqaraty/models/real_estate.dart';
-import 'package:aqaraty/pages/add_page.dart';
-import 'package:aqaraty/router/router.dart';
+import '../../components/realestate_card.dart';
+import '../../models/real_estate.dart';
+import '../../pages/add_page.dart';
+import '../../router/router.dart';
 import 'package:flutter/material.dart';
 
 List<RealEstate> data = [realesatateSample];

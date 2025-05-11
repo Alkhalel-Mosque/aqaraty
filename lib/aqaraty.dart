@@ -1,5 +1,6 @@
-import 'package:aqaraty/pages/home_page.dart';
-import 'package:aqaraty/themes/dark_theme.dart';
+import '../pages/login_page.dart';
+// import 'package:aqaraty/pages/home_page.dart';
+import '../themes/dark_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
@@ -19,7 +20,7 @@ class Aqaraty extends StatelessWidget {
       theme: lightTheme,
       darkTheme: darkTheme,
       locale: const Locale("ar"),
-      home: const HomePage(),
+      home: const LoginPage(),
     );
   }
 }
