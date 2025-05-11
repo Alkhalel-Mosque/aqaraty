@@ -85,13 +85,11 @@ class _LoginPageState extends State<LoginPage> {
     if (_formKey.currentState!.validate()) {
       String username = _usernameController.text.trim();
       String password = _passwordController.text.trim();
-      // final res = await api.login(username, password);
-      final res = await api.fetchAllItems();
-      if (false) {
+      final res = await api.login(username, password);
+      if (res) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text("Login Successful!")),
         );
-        // Navigate to HomePage after login
         context.myPushReplacment(HomePage());
       } else {
         ScaffoldMessenger.of(context).showSnackBar(

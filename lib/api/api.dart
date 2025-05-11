@@ -17,8 +17,7 @@ class Api {
     QueryBuilder<ParseObject> queryBuilder =
         QueryBuilder<ParseObject>(ParseObject('real_estate'))
           ..includeObject(['user']);
-    final ParseUser currentUser = await ParseUser.currentUser() as ParseUser;
-    print(currentUser);
+ 
 
     final ParseResponse response = await queryBuilder.query();
     if (response.success && response.results != null) {
