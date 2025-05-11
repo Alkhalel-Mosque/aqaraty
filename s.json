@@ -1,0 +1,256 @@
+[
+    {
+        "className": "real_estate",
+        "objectId": "iSP6I4tLAf",
+        "createdAt": "2025-05-09T14:23:28.303Z",
+        "updatedAt": "2025-05-09T17:01:53.596Z",
+        "mapLocation": {
+            "__type": "GeoPoint",
+            "latitude": 0.0,
+            "longitude": 0.0
+        },
+        "direction": {
+            "className": "ParseArray",
+            "estimatedArray": [
+                "east",
+                "west"
+            ],
+            "savedArray": [
+                "east",
+                "west"
+            ],
+            "lastPreformedOperation": null
+        },
+        "type": "sell",
+        "propertyType": "shop",
+        "locationArea": "masaken barazah",
+        "locationMark": "aksd",
+        "price": {
+            "className": "ParseNumber",
+            "estimateNumber": 5000,
+            "savedNumber": 5000,
+            "setMode": false,
+            "lastPreformedOperation": null
+        },
+        "condition": "old",
+        "floor": {
+            "className": "ParseNumber",
+            "estimateNumber": 5,
+            "savedNumber": 5,
+            "setMode": false,
+            "lastPreformedOperation": null
+        },
+        "rooms": {
+            "className": "ParseNumber",
+            "estimateNumber": 3,
+            "savedNumber": 3,
+            "setMode": false,
+            "lastPreformedOperation": null
+        },
+        "iswithSalon": true,
+        "iswithSofa": false,
+        "area": {
+            "className": "ParseNumber",
+            "estimateNumber": 100,
+            "savedNumber": 100,
+            "setMode": false,
+            "lastPreformedOperation": null
+        },
+        "ownershipType": "greenTitle",
+        "customerName": "maher",
+        "customerPhone": "0937915453",
+        "officeName": "",
+        "isOffice": false,
+        "furnishing": "semi",
+        "requestStatus": "pending",
+        "createdBy": {
+            "className": "ParseRelation",
+            "targetClass": "_User",
+            "key": null,
+            "objects": [],
+            "lastPreformedOperation": null
+        },
+        "ACL": {
+            "*": {
+                "read": true,
+                "write": true
+            }
+        }
+    },
+    {
+        "className": "real_estate",
+        "objectId": "9oD870Lixo",
+        "createdAt": "2025-05-09T16:56:00.733Z",
+        "updatedAt": "2025-05-09T16:56:00.733Z",
+        "type": "sell",
+        "propertyType": "apartment",
+        "locationArea": "asdasd",
+        "locationMark": "sadasd",
+        "price": {
+            "className": "ParseNumber",
+            "estimateNumber": 220,
+            "savedNumber": 220,
+            "setMode": false,
+            "lastPreformedOperation": null
+        },
+        "floor": {
+            "className": "ParseNumber",
+            "estimateNumber": 5,
+            "savedNumber": 5,
+            "setMode": false,
+            "lastPreformedOperation": null
+        },
+        "rooms": {
+            "className": "ParseNumber",
+            "estimateNumber": 5,
+            "savedNumber": 5,
+            "setMode": false,
+            "lastPreformedOperation": null
+        },
+        "iswithSalon": true,
+        "iswithSofa": false,
+        "area": {
+            "className": "ParseNumber",
+            "estimateNumber": 100,
+            "savedNumber": 100,
+            "setMode": false,
+            "lastPreformedOperation": null
+        },
+        "direction": {
+            "className": "ParseArray",
+            "estimatedArray": [
+                "west",
+                "east"
+            ],
+            "savedArray": [
+                "west",
+                "east"
+            ],
+            "lastPreformedOperation": null
+        },
+        "ownershipType": "sharesTitle",
+        "condition": "neW",
+        "customerName": "asdasd",
+        "customerPhone": "4659574954",
+        "officeName": null,
+        "officePhone": null,
+        "furnishing": "semi",
+        "isOffice": false,
+        "features": {
+            "className": "ParseArray",
+            "estimatedArray": [],
+            "savedArray": [],
+            "lastPreformedOperation": null
+        },
+        "description": null,
+        "gallary": null,
+        "requestStatus": "pending",
+        "createdBy": {
+            "className": "ParseRelation",
+            "targetClass": "_User",
+            "key": null,
+            "objects": [],
+            "lastPreformedOperation": null
+        }
+    },
+    {
+        "className": "real_estate",
+        "objectId": "TU9veFdW4k",
+        "createdAt": "2025-05-09T17:05:54.455Z",
+        "updatedAt": "2025-05-09T17:05:54.455Z",
+        "type": "sell",
+        "propertyType": "apartment",
+        "locationArea": "asdasdasedwq",
+        "locationMark": "asdwqeas",
+        "price": {
+            "className": "ParseNumber",
+            "estimateNumber": 100,
+            "savedNumber": 100,
+            "setMode": false,
+            "lastPreformedOperation": null
+        },
+        "floor": {
+            "className": "ParseNumber",
+            "estimateNumber": 5,
+            "savedNumber": 5,
+            "setMode": false,
+            "lastPreformedOperation": null
+        },
+        "rooms": {
+            "className": "ParseNumber",
+            "estimateNumber": 5,
+            "savedNumber": 5,
+            "setMode": false,
+            "lastPreformedOperation": null
+        },
+        "iswithSalon": false,
+        "iswithSofa": false,
+        "area": {
+            "className": "ParseNumber",
+            "estimateNumber": 100,
+            "savedNumber": 100,
+            "setMode": false,
+            "lastPreformedOperation": null
+        },
+        "direction": {
+            "className": "ParseArray",
+            "estimatedArray": [
+                "east",
+                "west"
+            ],
+            "savedArray": [
+                "east",
+                "west"
+            ],
+            "lastPreformedOperation": null
+        },
+        "ownershipType": "rightOfUse",
+        "condition": "structureOnly",
+        "customerName": "asdasdasd",
+        "customerPhone": "2456543",
+        "officeName": null,
+        "officePhone": null,
+        "furnishing": "full",
+        "isOffice": false,
+        "features": {
+            "className": "ParseArray",
+            "estimatedArray": [],
+            "savedArray": [],
+            "lastPreformedOperation": null
+        },
+        "description": null,
+        "gallary": null,
+        "requestStatus": "pending",
+        "user": {
+            "className": "_User",
+            "objectId": "obhQcwo0MI",
+            "createdAt": "2025-05-09T13:58:27.375Z",
+            "updatedAt": "2025-05-09T15:58:14.037Z",
+            "username": "anas",
+            "emailVerified": false,
+            "phonenumber": "0994820923",
+            "canAdd": true,
+            "canEdit": true,
+            "canEditAll": true,
+            "canDelete": true,
+            "canDeleteAll": true,
+            "ACL": {
+                "*": {
+                    "read": true,
+                    "write": true
+                },
+                "obhQcwo0MI": {
+                    "read": true,
+                    "write": true
+                }
+            }
+        },
+        "createdBy": {
+            "className": "ParseRelation",
+            "targetClass": "_User",
+            "key": null,
+            "objects": [],
+            "lastPreformedOperation": null
+        }
+    }
+]
