@@ -17,9 +17,10 @@ class Api {
     QueryBuilder<ParseObject> queryBuilder =
         QueryBuilder<ParseObject>(ParseObject('real_estate'))
           ..includeObject(['user']);
+    final ParseUser currentUser = await ParseUser.currentUser() as ParseUser;
+    print(currentUser);
 
     final ParseResponse response = await queryBuilder.query();
-    print(response.results);
     if (response.success && response.results != null) {
       return [];
       // return (response.results as List<ParseObject>).map((e) => e.,).toList();

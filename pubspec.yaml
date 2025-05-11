@@ -32,7 +32,6 @@ dependencies:
   fluttertoast: ^8.2.8
   flutter_map: any
   latlong2: any
-  geolocator: ^10.0.0
   permission_handler: ^10.0.0
 
 dev_dependencies:
