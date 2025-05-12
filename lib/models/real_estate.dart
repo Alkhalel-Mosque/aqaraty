@@ -1,9 +1,10 @@
+import 'package:aqaraty/models/user.dart';
+import 'package:equatable/equatable.dart';
 import 'package:parse_server_sdk_flutter/parse_server_sdk_flutter.dart';
-
 import '../enums/enums.dart';
 
-class RealEstate {
-  int? id;
+class RealEstate extends Equatable {
+  String? id;
   Types? type;
   PropertyType? propertyType;
   String? locationArea;
@@ -24,9 +25,9 @@ class RealEstate {
   Furnishing? furnishing;
   bool isOffice;
   List<Features>? features;
-  String? description;
+  String? additionalInformation;
   List<String>? gallary;
-  int? createdBy;
+  User? createdBy;
   RequestStatus? requestStatus;
 
   RealEstate({
@@ -51,10 +52,10 @@ class RealEstate {
     this.furnishing,
     this.isOffice = false,
     this.features,
-    this.description,
+    this.additionalInformation,
     this.gallary,
     this.createdBy,
-    this.requestStatus=RequestStatus.pending,
+    this.requestStatus = RequestStatus.pending,
   });
 
   Future<ParseObject> realEstateToParseObject(RealEstate realEstate) async {
@@ -84,6 +85,7 @@ class RealEstate {
 
     // Set all properties
     parseObject.set<String?>('type', typeString);
+    parseObject.set<String?>('objectId', id);
     parseObject.set<String?>('propertyType', propertyTypeString);
     parseObject.set<String?>('locationArea', realEstate.locationArea);
     parseObject.set<String?>('locationMark', realEstate.locationMark);
@@ -103,16 +105,70 @@ class RealEstate {
     parseObject.set<String?>('furnishing', furnishingString);
     parseObject.set<bool?>('isOffice', realEstate.isOffice);
     parseObject.set<List?>('features', featuresArray);
-    parseObject.set<String?>('description', realEstate.description);
+    parseObject.set<String?>(
+        'additional_information', realEstate.additionalInformation);
     parseObject.set<List?>('gallary', realEstate.gallary);
     parseObject.set<String?>('requestStatus', requestStatusString);
-    final ParseUser currentUser = await ParseUser.currentUser() as ParseUser;
-    parseObject.set('user', currentUser.toPointer());
 
-    parseObject.addRelation('createdBy', [currentUser]);
-    print(parseObject);
+    if (realEstate.createdBy == null) {
+      final ParseUser currentUser = await ParseUser.currentUser() as ParseUser;
+      parseObject.set('user', currentUser.toPointer());
+    }
 
     return parseObject;
+  }
+
+  factory RealEstate.realEstateFromParseObject(ParseObject parseObject) {
+    // Helper function to convert enum strings back to enum values
+    T? enumFromString<T>(List<T> values, String? str) {
+      if (str == null) return null;
+      return values.firstWhere(
+        (v) => v.toString().split('.').last == str,
+        orElse: () => null as T,
+      );
+    }
+
+    return RealEstate(
+      id: parseObject.objectId,
+      type: enumFromString(Types.values, parseObject.get<String>('type')),
+      propertyType: enumFromString(
+          PropertyType.values, parseObject.get<String>('propertyType')),
+      locationArea: parseObject.get<String>('locationArea'),
+      locationMark: parseObject.get<String>('locationMark'),
+      price: parseObject.get<int>('price') ?? 0,
+      floor: parseObject.get<int>('floor'),
+      rooms: parseObject.get<int>('rooms') ?? 0,
+      iswithSalon: parseObject.get<bool>('iswithSalon') ?? false,
+      iswithSofa: parseObject.get<bool>('iswithSofa') ?? false,
+      area: parseObject.get<int>('area'),
+      direction: (parseObject.get<List<dynamic>>('direction') ?? [])
+          .map((e) => enumFromString(Direction.values, e as String?))
+          .whereType<Direction>()
+          .toList(),
+      ownershipType: enumFromString(
+          OwnershipType.values, parseObject.get<String>('ownershipType')),
+      condition: enumFromString(
+          Condition.values, parseObject.get<String>('condition')),
+      customerName: parseObject.get<String>('customerName'),
+      customerPhone: parseObject.get<String>('customerPhone'),
+      officeName: parseObject.get<String>('officeName'),
+      officePhone: parseObject.get<String>('officePhone'),
+      furnishing: enumFromString(
+          Furnishing.values, parseObject.get<String>('furnishing')),
+      isOffice: parseObject.get<bool>('isOffice') ?? false,
+      features: (parseObject.get<List<dynamic>>('features') ?? [])
+          .map((e) => enumFromString(Features.values, e as String?))
+          .whereType<Features>()
+          .toList(),
+      additionalInformation: parseObject.get<String>('additional_information'),
+      gallary: (parseObject.get<List<dynamic>>('gallary') ?? [])
+          .map((e) => e as String)
+          .toList(),
+      createdBy: User.userFromParseUser(parseObject.get('user')!),
+      requestStatus: enumFromString(
+              RequestStatus.values, parseObject.get<String>('requestStatus')) ??
+          RequestStatus.pending,
+    );
   }
 
   String get getRoomsWithExtra {
@@ -138,28 +194,122 @@ class RealEstate {
 
   String get getPrice =>
       "${price.toString().replaceAllMapped(reg, mathFunc)} ل.س";
-  String get getFloor => ordinalsAr(floor!);
+  String? get getFloor => ordinalsAr(floor);
+
+  RealEstate copyWith({
+    String? id,
+    Types? type,
+    PropertyType? propertyType,
+    String? locationArea,
+    String? locationMark,
+    int? price,
+    int? floor,
+    int? rooms,
+    bool? iswithSalon,
+    bool? iswithSofa,
+    int? area,
+    List<Direction>? direction,
+    OwnershipType? ownershipType,
+    Condition? condition,
+    String? customerName,
+    String? customerPhone,
+    String? officeName,
+    String? officePhone,
+    Furnishing? furnishing,
+    bool? isOffice,
+    List<Features>? features,
+    String? additionalInformation,
+    List<String>? gallary,
+    User? createdBy,
+    RequestStatus? requestStatus,
+  }) {
+    return RealEstate(
+      id: id ?? this.id,
+      type: type ?? this.type,
+      propertyType: propertyType ?? this.propertyType,
+      locationArea: locationArea ?? this.locationArea,
+      locationMark: locationMark ?? this.locationMark,
+      price: price ?? this.price,
+      floor: floor ?? this.floor,
+      rooms: rooms ?? this.rooms,
+      iswithSalon: iswithSalon ?? this.iswithSalon,
+      iswithSofa: iswithSofa ?? this.iswithSofa,
+      area: area ?? this.area,
+      direction: direction ??
+          (this.direction != null
+              ? List<Direction>.from(this.direction!)
+              : null),
+      ownershipType: ownershipType ?? this.ownershipType,
+      condition: condition ?? this.condition,
+      customerName: customerName ?? this.customerName,
+      customerPhone: customerPhone ?? this.customerPhone,
+      officeName: officeName ?? this.officeName,
+      officePhone: officePhone ?? this.officePhone,
+      furnishing: furnishing ?? this.furnishing,
+      isOffice: isOffice ?? this.isOffice,
+      features: features ??
+          (this.features != null ? List<Features>.from(this.features!) : null),
+      additionalInformation:
+          additionalInformation ?? this.additionalInformation,
+      gallary: gallary ??
+          (this.gallary != null ? List<String>.from(this.gallary!) : null),
+      createdBy: createdBy ?? this.createdBy,
+      requestStatus: requestStatus ?? this.requestStatus,
+    );
+  }
+
+  @override
+  List<Object?> get props => [
+        id,
+        type,
+        propertyType,
+        locationArea,
+        locationMark,
+        price,
+        floor,
+        rooms,
+        iswithSalon,
+        iswithSofa,
+        area,
+        direction,
+        ownershipType,
+        condition,
+        customerName,
+        customerPhone,
+        officeName,
+        officePhone,
+        furnishing,
+        isOffice,
+        features,
+        additionalInformation,
+        gallary,
+        createdBy,
+        requestStatus,
+      ];
 }
 
-final realesatateSample = RealEstate(
-  id: 0,
-  type: Types.sell,
-  propertyType: PropertyType.apartment,
-  locationArea: "مساكن برزة",
-  locationMark: "حلف الجامع",
-  price: 20000000000,
-  floor: 9,
-  iswithSalon: true,
-  rooms: 2,
-  direction: [Direction.east, Direction.north],
-  ownershipType: OwnershipType.housingTitle,
-  customerName: "ابو علي",
-  customerPhone: "0964866245",
-  furnishing: Furnishing.full,
-  createdBy: 5,
-);
+// final realesatateSample = RealEstate(
+//   id: "0",
+//   type: Types.sell,
+//   propertyType: PropertyType.apartment,
+//   locationArea: "مساكن برزة",
+//   locationMark: "حلف الجامع",
+//   price: 20000000000,
+//   floor: 9,
+//   iswithSalon: true,
+//   rooms: 2,
+//   direction: [Direction.east, Direction.north],
+//   ownershipType: OwnershipType.housingTitle,
+//   customerName: "ابو علي",
+//   customerPhone: "0964866245",
+//   furnishing: Furnishing.full,
+//   createdBy: User(id: "g"),
+// );
 
-String ordinalsAr(int num, {bool isFeminine = false}) {
+String? ordinalsAr(int? num, {bool isFeminine = false}) {
+  if (num == null) {
+    return null;
+  }
   if (num == -2) {
     return " قبو ثاني";
   } else if (num == -1) {

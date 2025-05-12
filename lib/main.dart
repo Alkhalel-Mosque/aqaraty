@@ -4,8 +4,8 @@ import '../aqaraty.dart';
 import 'package:flutter/material.dart';
 import 'package:parse_server_sdk_flutter/parse_server_sdk_flutter.dart';
 
-void main() {
-  initialServer();
+void main() async {
+  await initialServer();
   runApp(const ProviderScope(child: Aqaraty()));
 }
 
@@ -17,6 +17,4 @@ initialServer() async {
 
   await Parse().initialize(keyApplicationId, keyParseServerUrl,
       clientKey: keyClientKey, autoSendSessionId: true);
-      
-  
 }

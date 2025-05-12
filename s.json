@@ -63,13 +63,6 @@
         "isOffice": false,
         "furnishing": "semi",
         "requestStatus": "pending",
-        "createdBy": {
-            "className": "ParseRelation",
-            "targetClass": "_User",
-            "key": null,
-            "objects": [],
-            "lastPreformedOperation": null
-        },
         "ACL": {
             "*": {
                 "read": true,
@@ -144,14 +137,7 @@
         },
         "description": null,
         "gallary": null,
-        "requestStatus": "pending",
-        "createdBy": {
-            "className": "ParseRelation",
-            "targetClass": "_User",
-            "key": null,
-            "objects": [],
-            "lastPreformedOperation": null
-        }
+        "requestStatus": "pending"
     },
     {
         "className": "real_estate",
@@ -225,11 +211,12 @@
             "className": "_User",
             "objectId": "obhQcwo0MI",
             "createdAt": "2025-05-09T13:58:27.375Z",
-            "updatedAt": "2025-05-09T15:58:14.037Z",
+            "updatedAt": "2025-05-11T11:31:12.030Z",
             "username": "anas",
             "emailVerified": false,
+            "email": "",
             "phonenumber": "0994820923",
-            "canAdd": true,
+            "canAdd": false,
             "canEdit": true,
             "canEditAll": true,
             "canDelete": true,
@@ -244,13 +231,6 @@
                     "write": true
                 }
             }
-        },
-        "createdBy": {
-            "className": "ParseRelation",
-            "targetClass": "_User",
-            "key": null,
-            "objects": [],
-            "lastPreformedOperation": null
         }
     }
 ]

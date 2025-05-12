@@ -33,6 +33,7 @@ dependencies:
   flutter_map: any
   latlong2: any
   permission_handler: ^10.0.0
+  equatable: ^2.0.5
 
 dev_dependencies:
   flutter_test:
@@ -53,3 +54,4 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
     - assets/images/house_sample.jpg
+    - assets/images/profile.png

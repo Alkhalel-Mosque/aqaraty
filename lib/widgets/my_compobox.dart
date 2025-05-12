@@ -27,7 +27,7 @@ class _MyComboBoxState extends State<MyComboBox> {
       expandedInsets: const EdgeInsets.all(0),
       initialSelection: widget.text,
       label: Text(
-        widget.text!,
+        widget.hint,
         style: TextStyle(
           color: Theme.of(context).colorScheme.primary,
         ),

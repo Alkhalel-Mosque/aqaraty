@@ -1,10 +1,15 @@
+import 'package:aqaraty/api/api.dart';
+import 'package:aqaraty/models/real_estate.dart';
 import 'package:aqaraty/models/user.dart';
+import 'package:aqaraty/utils/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:parse_server_sdk_flutter/parse_server_sdk_flutter.dart';
 
 class CoreProvider extends ChangeNotifier {
   User? user;
   ParseUser? parseUser;
+  Api api = Api();
+  List<RealEstate> realEstates = [];
   Future getCashedUser() async {
     final ParseUser? currentUser = await ParseUser.currentUser();
     parseUser = currentUser;
@@ -16,7 +21,49 @@ class CoreProvider extends ChangeNotifier {
     }
     notifyListeners();
   }
-  
+
+  featchData() async {
+    // try {
+    final res = await api.fetchAllItems();
+    realEstates = res;
+    notifyListeners();
+    // } catch (e) {
+    //   print(e);
+    // }
+  }
+
+  addRealEstate(RealEstate realEstate) async {
+    try {
+      final res = await api.addRealEstate(realEstate);
+      notifyListeners();
+      return res;
+    } catch (e) {
+      CustomToast.showToast(e.toString());
+      return false;
+    }
+  }
+
+  updateRealEstate(RealEstate realEstate) async {
+    try {
+      final res = await api.updateRealEstate(realEstate);
+      notifyListeners();
+      return res;
+    } catch (e) {
+      CustomToast.showToast(e.toString());
+      return false;
+    }
+  }
+
+  deleteRealEstate(String id) async {
+    try {
+      final res = await api.deleteRealEstate(id);
+      notifyListeners();
+      return res;
+    } catch (e) {
+      CustomToast.showToast(e.toString());
+      return false;
+    }
+  }
 
   Future<void> fullLogout() async {
     try {
