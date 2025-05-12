@@ -1,3 +1,4 @@
+import 'package:aqaraty/components/filter_button.dart';
 import 'package:aqaraty/router/router.dart';
 import 'package:flutter/material.dart';
 
@@ -129,6 +130,16 @@ class _SearchScreenState<T> extends State<SearchScreen<T>> {
                     ),
                 ],
               ),
+            ),
+          ),
+          SizedBox(
+            height: 40,
+            child: ListView(
+              shrinkWrap: true,
+              scrollDirection: Axis.horizontal,
+              children: [
+                FilterButton(),
+              ],
             ),
           ),
           if (result.isNotEmpty)

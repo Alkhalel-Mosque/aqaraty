@@ -7,10 +7,10 @@ class CustomToast {
 
   static showToast(String content) {
     print(content);
-    // Fluttertoast.cancel();
-    // Fluttertoast.showToast(
-    //   msg: content,
-    //   toastLength: Toast.LENGTH_LONG,
-    // );
+    Fluttertoast.cancel();
+    Fluttertoast.showToast(
+      msg: content,
+      toastLength: Toast.LENGTH_LONG,
+    );
   }
 }
