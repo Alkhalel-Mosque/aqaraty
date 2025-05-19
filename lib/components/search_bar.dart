@@ -1,4 +1,5 @@
 import 'package:aqaraty/components/filter_button.dart';
+import 'package:aqaraty/models/real_estate.dart';
 import 'package:aqaraty/pages/search_page.dart';
 import 'package:aqaraty/router/router.dart';
 import 'package:flutter/material.dart';
@@ -13,6 +14,7 @@ class CustomSearchBar<T> extends StatelessWidget {
     this.leading,
     this.trailing,
     this.resultBuilder,
+    required this.allEstates,
   });
   final List<T> Function(dynamic)? onSearch;
   final String hint;
@@ -21,6 +23,7 @@ class CustomSearchBar<T> extends StatelessWidget {
   final Widget? leading;
   final Widget? trailing;
   final Widget Function(BuildContext, int, T)? resultBuilder;
+  final List<T> allEstates;
 
   @override
   Widget build(BuildContext context) {
@@ -34,6 +37,7 @@ class CustomSearchBar<T> extends StatelessWidget {
         onTap: () {
           context.myPush(
             SearchScreen<T>(
+              allEstates: allEstates,
               onSearch: onSearch,
               hint: hint,
               resultBuilder: resultBuilder,

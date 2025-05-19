@@ -1,31 +1,53 @@
-import 'package:aqaraty/components/filter_button.dart';
 import 'package:aqaraty/components/my_list_filter.dart';
-import 'package:aqaraty/enums/enums.dart';
+import 'package:aqaraty/models/real_estate.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class SearchScreen<T> extends StatefulWidget {
+class SearchScreen<T> extends ConsumerStatefulWidget {
   const SearchScreen({
     super.key,
     this.onSearch,
     required this.hint,
     this.resultBuilder,
+    required this.allEstates,
   });
+
   final String hint;
   final List<T> Function(dynamic)? onSearch;
   final Widget Function(BuildContext, int, T)? resultBuilder;
+  final List<T> allEstates;
+
   @override
-  State<SearchScreen<T>> createState() => _SearchScreenState<T>();
+  ConsumerState<SearchScreen<T>> createState() => _SearchScreenState<T>();
 }
 
-class _SearchScreenState<T> extends State<SearchScreen<T>> {
+class _SearchScreenState<T> extends ConsumerState<SearchScreen<T>> {
+  final TextEditingController _controller = TextEditingController();
+
+  List<T> filteredList = [];
   List<T> result = [];
 
-  final TextEditingController _controller = TextEditingController();
+  void updateResult() {
+    final searchQuery = _controller.text.toLowerCase();
+
+    setState(() {
+      if (searchQuery.isEmpty) {
+        result = filteredList;
+      }
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    filteredList = widget.allEstates;
+    result = widget.allEstates;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Container(
             decoration: BoxDecoration(
@@ -40,9 +62,9 @@ class _SearchScreenState<T> extends State<SearchScreen<T>> {
                     child: TextField(
                       autofocus: true,
                       controller: _controller,
-                      onChanged: (value) {
+                      onChanged: (_) {
                         setState(() {
-                          result = widget.onSearch?.call(value) ?? [];
+                          updateResult();
                         });
                       },
                       decoration: InputDecoration(
@@ -54,10 +76,8 @@ class _SearchScreenState<T> extends State<SearchScreen<T>> {
                   if (_controller.text.isNotEmpty)
                     IconButton(
                       onPressed: () {
-                        setState(() {
-                          _controller.clear();
-                          result = [];
-                        });
+                        _controller.clear();
+                        updateResult();
                       },
                       icon: const Icon(Icons.close),
                     ),
@@ -65,10 +85,20 @@ class _SearchScreenState<T> extends State<SearchScreen<T>> {
               ),
             ),
           ),
-          const SizedBox(
+          SizedBox(
             height: 50,
             child: Padding(
-                padding: EdgeInsets.only(top: 10), child: MyListFilter()),
+              padding: const EdgeInsets.only(top: 10),
+              child: MyListFilter(
+                allEstates: widget.allEstates.cast<RealEstate>(),
+                onFilterChanged: (filtered) {
+                  setState(() {
+                    filteredList = filtered.cast<T>();
+                  });
+                  updateResult();
+                },
+              ),
+            ),
           ),
           if (result.isNotEmpty)
             Padding(
@@ -78,20 +108,32 @@ class _SearchScreenState<T> extends State<SearchScreen<T>> {
           if (result.isEmpty && _controller.text.isNotEmpty)
             const Padding(
               padding: EdgeInsets.all(20),
-              child: Icon(Icons.data_array),
+              child: Column(
+                children: [
+                  Icon(Icons.search_off),
+                  Text("لا توجد نتائج بحث"),
+                ],
+              ),
             ),
-          if (result.isEmpty && _controller.text.isNotEmpty)
-            const Text("لاتوجد نتائج بحث"),
           Expanded(
-            child: ListView.separated(
-              padding: EdgeInsets.zero,
-              separatorBuilder: (context, index) =>
-                  const Divider(height: 1, endIndent: 10, indent: 10),
-              itemBuilder: (context, index) =>
-                  widget.resultBuilder?.call(context, index, result[index]),
-              itemCount: result.length,
-            ),
-          ),
+              child: result.isEmpty
+                  ? const Padding(
+                      padding: EdgeInsets.all(20),
+                      child: Column(
+                        children: [
+                          Icon(Icons.search_off),
+                          Text("لا توجد نتائج بحث"),
+                        ],
+                      ),
+                    )
+                  : ListView.separated(
+                      padding: EdgeInsets.zero,
+                      separatorBuilder: (context, index) =>
+                          const Divider(height: 1, endIndent: 10, indent: 10),
+                      itemBuilder: (context, index) => widget.resultBuilder
+                          ?.call(context, index, result[index]),
+                      itemCount: result.length,
+                    )),
         ],
       ),
     );

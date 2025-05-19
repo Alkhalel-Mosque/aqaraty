@@ -1,4 +1,5 @@
 // components/bool_filter_button.dart
+import 'package:aqaraty/extensions/extension.dart';
 import 'package:flutter/material.dart';
 
 class BoolFilterButton extends StatelessWidget {
@@ -15,8 +16,19 @@ class BoolFilterButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return OutlinedButton(
-      child: Text(title),
+    final theme = Theme.of(context);
+    final bool isSelected = value != null;
+    return ElevatedButton(
+      style: ElevatedButton.styleFrom(
+          side: const BorderSide(color: Colors.white, width: 0.3),
+          backgroundColor: isSelected
+              ? const Color.fromARGB(47, 68, 137, 255)
+              : theme.primaryColor),
+      child: Row(children: [
+        2.getWidthSizedBox,
+        Text(title),
+        const Icon(Icons.arrow_drop_down_rounded)
+      ]),
       onPressed: () {
         showModalBottomSheet(
           context: context,

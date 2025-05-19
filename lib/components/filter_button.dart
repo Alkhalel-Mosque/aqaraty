@@ -19,9 +19,16 @@ class FilterButtonTile<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isSelected = selectedValues.isNotEmpty;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 2),
-      child: OutlinedButton(
+      child: ElevatedButton(
+        style: ElevatedButton.styleFrom(
+            side: const BorderSide(color: Colors.white, width: 0.3),
+            backgroundColor: isSelected
+                ? const Color.fromARGB(47, 68, 137, 255)
+                : theme.primaryColor),
         onPressed: () {
           showModalBottomSheet(
             context: context,
@@ -73,7 +80,7 @@ class FilterButtonTile<T> extends StatelessWidget {
           children: [
             2.getWidthSizedBox,
             Text(title),
-            Icon(Icons.arrow_drop_down_rounded),
+            const Icon(Icons.arrow_drop_down_rounded),
           ],
         ),
       ),
