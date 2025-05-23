@@ -34,6 +34,7 @@ dependencies:
   latlong2: any
   permission_handler: ^10.0.0
   equatable: ^2.0.5
+  font_awesome_flutter: ^10.1.0
 
 dev_dependencies:
   flutter_test:

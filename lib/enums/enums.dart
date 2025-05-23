@@ -157,7 +157,8 @@ enum OwnershipType {
   temporaryRegister;
 
   static OwnershipType getFromString(String string) {
-    return switch (string.trim()) {  // Added trim() to handle whitespace
+    return switch (string.trim()) {
+      // Added trim() to handle whitespace
       "طابو إسكان" => OwnershipType.housingTitle,
       "طابو أسهم" => OwnershipType.sharesTitle,
       "طابو أخضر" => OwnershipType.greenTitle,
@@ -210,6 +211,15 @@ enum RequestStatus {
   pending,
   complete,
   canceled;
+
+  static RequestStatus getFromString(String string) {
+    return switch (string.trim()) {
+      "معلق" => RequestStatus.pending,
+      "مكتمل" => RequestStatus.complete,
+      "ملغى" => RequestStatus.canceled,
+      _ => throw ArgumentError('Unknown request status string: $string'),
+    };
+  }
 
   String get arName {
     return switch (this) {

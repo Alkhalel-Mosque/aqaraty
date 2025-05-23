@@ -1,5 +1,5 @@
 import 'package:aqaraty/components/my_snackbar.dart';
-import 'package:aqaraty/pages/login_page.dart';
+import 'package:aqaraty/pages/new_log.dart';
 import 'package:aqaraty/provider/notifiers.dart';
 import 'package:aqaraty/router/router.dart';
 import 'package:flutter/material.dart';

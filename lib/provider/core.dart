@@ -54,6 +54,17 @@ class CoreProvider extends ChangeNotifier {
     }
   }
 
+  newupdateRealEstate(RealEstate realEstate) async {
+    try {
+      final res = await api.updatePropertyWithPermissionCheck(realEstate);
+      notifyListeners();
+      return res;
+    } catch (e) {
+      CustomToast.showToast(e.toString());
+      return false;
+    }
+  }
+
   deleteRealEstate(String id) async {
     try {
       final res = await api.deleteRealEstate(id);

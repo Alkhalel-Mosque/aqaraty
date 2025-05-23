@@ -2,7 +2,7 @@ import 'package:aqaraty/pages/home_page.dart';
 import 'package:aqaraty/provider/notifiers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../pages/login_page.dart';
+import '../pages/new_log.dart';
 // import 'package:aqaraty/pages/home_page.dart';
 import '../themes/dark_theme.dart';
 import 'package:flutter/material.dart';

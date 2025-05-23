@@ -6,7 +6,6 @@ class User {
   final String password;
   final String phonenumber;
   final bool canAdd;
-  final bool canEdit;
   final bool canEditAll;
   final bool canDelete;
   final bool canDeleteAll;
@@ -18,7 +17,6 @@ class User {
     required this.password,
     required this.phonenumber,
     required this.canAdd,
-    required this.canEdit,
     required this.canEditAll,
     required this.canDelete,
     required this.canDeleteAll,
@@ -32,7 +30,6 @@ class User {
       password: '', // Passwords aren't readable from ParseUser
       phonenumber: parseUser.get<String>('phonenumber') ?? '',
       canAdd: parseUser.get<bool>('canAdd') ?? false,
-      canEdit: parseUser.get<bool>('canEdit') ?? false,
       canEditAll: parseUser.get<bool>('canEditAll') ?? false,
       canDelete: parseUser.get<bool>('canDelete') ?? false,
       canDeleteAll: parseUser.get<bool>('canDeleteAll') ?? false,

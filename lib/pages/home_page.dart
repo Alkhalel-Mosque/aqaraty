@@ -8,8 +8,6 @@ import '../../pages/add_page.dart';
 import '../../router/router.dart';
 import 'package:flutter/material.dart';
 
-// List<RealEstate> data = [realesatateSample];
-
 class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});
 

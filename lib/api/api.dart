@@ -79,4 +79,27 @@ class Api {
       rethrow;
     }
   }
+
+  Future<bool> updatePropertyWithPermissionCheck(RealEstate realEstate) async {
+    try {
+      final ParseCloudFunction function =
+          ParseCloudFunction('updateRealEstate');
+
+      final Map<String, dynamic> params =
+          (await realEstate.realEstateToParseObject(realEstate)).toJson();
+      log(params.toString());
+      final ParseResponse result = await function.execute(parameters: params);
+
+      if (result.success && result.result != null) {
+        print("Response: ${result.result}");
+      } else {
+        print("Error: ${result.error?.message}");
+      }
+
+      return true;
+    } catch (e) {
+      print(e);
+      return false;
+    }
+  }
 }
