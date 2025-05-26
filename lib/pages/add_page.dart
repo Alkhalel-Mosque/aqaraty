@@ -1,3 +1,4 @@
+import 'package:aqaraty/components/my_map.dart';
 import 'package:aqaraty/components/my_snackbar.dart';
 import 'package:aqaraty/provider/notifiers.dart';
 import 'package:flutter_map/flutter_map.dart';
@@ -27,8 +28,7 @@ class AddPage extends ConsumerStatefulWidget {
 
 class _AddPageState extends ConsumerState<AddPage> {
   bool editable = true;
-  final ctl = MapController();
-  LatLng? lat;
+
   // Position? _currentPosition;
   RealEstate realEstate = RealEstate(
     direction: [],
@@ -206,55 +206,7 @@ class _AddPageState extends ConsumerState<AddPage> {
               10.getHightSizedBox,
               ClipRRect(
                 borderRadius: BorderRadius.circular(15),
-                child: SizedBox(
-                  height: 200,
-                  child: FlutterMap(
-                    mapController: ctl,
-                    options: MapOptions(
-                      center: LatLng(33.5449, 36.3233), // Damascus coordinates
-                      zoom: 17,
-                    ),
-                    children: [
-                      TileLayer(
-                        // Bring your own tiles
-                        maxZoom: 100,
-                        urlTemplate:
-                            'https://tile.openstreetmap.org/{z}/{x}/{y}.png', // For demonstration only
-                        userAgentPackageName:
-                            'com.example.app', // Add your app identifier
-                        // And many more recommended properties!
-                      ),
-                      MarkerLayer(
-                        markers: [
-                          Marker(
-                            point: lat ?? LatLng(0, 0),
-                            builder: (ctx) =>
-                                Icon(Icons.location_pin, color: Colors.red),
-                          ),
-                        ],
-                      ),
-                      MarkerLayer(
-                        markers: [
-                          Marker(
-                            point: LatLng(33.545405, 36.322474),
-                            builder: (ctx) =>
-                                Icon(Icons.location_pin, color: Colors.red),
-                          ),
-                        ],
-                      ),
-
-                      // MarkerLayer(
-                      //   markers: [
-                      //     Marker(
-                      //       point: LatLng(_currentPosition?.latitude??0, _currentPosition?.longitude??0),
-                      //       builder: (ctx) =>
-                      //           Icon(Icons.location_pin, color: Colors.blue),
-                      //     ),
-                      //   ],
-                      // ),
-                    ],
-                  ),
-                ),
+                child: SizedBox(height: 200, child: My_map()),
               ),
               10.getHightSizedBox,
               MyTextFormField(
