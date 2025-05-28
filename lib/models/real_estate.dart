@@ -24,7 +24,7 @@ class RealEstate extends Equatable {
   String? officePhone;
   Furnishing? furnishing;
   bool isOffice;
-  List<Features>? features;
+  List<Features>? features = [];
   String? additionalInformation;
   List<String>? gallary;
   User? createdBy;

@@ -16,14 +16,12 @@ class Api {
   }
 
   Future<List<RealEstate>> fetchAllItems() async {
-    print("fetchAllItems");
     QueryBuilder<ParseObject> queryBuilder =
         QueryBuilder<ParseObject>(ParseObject('real_estate'))
           ..includeObject(['user']);
 
     final ParseResponse response = await queryBuilder.query();
     if (response.success && response.results != null) {
-      print("object");
       return (response.results as List<ParseObject>)
           .map((e) => RealEstate.realEstateFromParseObject(e))
           .toList();
@@ -56,10 +54,8 @@ class Api {
         throw Exception('Update failed: ${response.error?.message}');
       }
 
-      print('Successfully updated object: ${response.result.objectId}');
       return true;
     } catch (e) {
-      print('Update error: $e');
       rethrow;
     }
   }
@@ -72,10 +68,8 @@ class Api {
       if (!response.success) {
         throw Exception('Delete failed: ${response.error?.message}');
       }
-      print('Successfully deleted object: $objectId');
       return true;
     } catch (e) {
-      print('Delete error: $e');
       rethrow;
     }
   }
@@ -91,14 +85,10 @@ class Api {
       final ParseResponse result = await function.execute(parameters: params);
 
       if (result.success && result.result != null) {
-        print("Response: ${result.result}");
-      } else {
-        print("Error: ${result.error?.message}");
-      }
+      } else {}
 
       return true;
     } catch (e) {
-      print(e);
       return false;
     }
   }

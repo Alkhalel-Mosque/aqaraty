@@ -34,10 +34,10 @@ class _AddPageState extends ConsumerState<AddPage> {
     direction: [],
     features: [],
   );
-  RealEstate draft = RealEstate(
-    direction: [],
-    features: [],
-  );
+  // RealEstate draft = RealEstate(
+  //   direction: [],
+  //   features: [],
+  // );
   @override
   void initState() {
     if (widget.realEstate != null) {
@@ -128,12 +128,12 @@ class _AddPageState extends ConsumerState<AddPage> {
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () async {
-        final res =
-            (widget.realEstate != null && widget.realEstate != realEstate) ||
-                (realEstate != draft);
-        if (res) {
-          return await MySnackBar.showYesNoDialog(context, "هل تود الخروج ؟");
-        }
+        // final res =
+        //     (widget.realEstate != null && widget.realEstate != realEstate) ||
+        //         (realEstate != draft);
+        // if (res) {
+        //   return await MySnackBar.showYesNoDialog(context, "هل تود الخروج ؟");
+        // }
         return true;
       },
       child: Scaffold(

@@ -45,7 +45,7 @@ class _HomePageState extends ConsumerState<HomePage> {
               padding: const EdgeInsets.all(8.0),
               child: CustomSearchBar(
                 resultBuilder: (p0, p1, p2) {
-                  return RealestateCard(realEstate: data[p1]);
+                  return RealestateCard(realEstate: p2);
                 },
                 hint: "",
                 title: "عقاراتي",
