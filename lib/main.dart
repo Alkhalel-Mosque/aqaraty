@@ -9,12 +9,19 @@ void main() async {
   runApp(const ProviderScope(child: Aqaraty()));
 }
 
-initialServer() async {
+Future<void> initialServer() async {
+
   WidgetsFlutterBinding.ensureInitialized();
+  
   const keyApplicationId = 'hhfftwGWHUZ4xDgoEveepbg8D25dUZqMDQJtvRp7';
   const keyClientKey = 'FOGdXmYSVKCLvyWFahPPUad64IgiLKAORrg68Z5G';
   const keyParseServerUrl = 'https://parseapi.back4app.com';
 
-  await Parse().initialize(keyApplicationId, keyParseServerUrl,
-      clientKey: keyClientKey, autoSendSessionId: true);
+  await Parse().initialize(
+    keyApplicationId,
+    keyParseServerUrl,
+    clientKey: keyClientKey,
+    autoSendSessionId: true,
+  );
+
 }

@@ -1,5 +1,6 @@
 import 'package:aqaraty/models/user.dart';
 import 'package:equatable/equatable.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:parse_server_sdk_flutter/parse_server_sdk_flutter.dart';
 import '../enums/enums.dart';
 
@@ -29,6 +30,7 @@ class RealEstate extends Equatable {
   List<String>? gallary;
   User? createdBy;
   RequestStatus? requestStatus;
+  LatLng? coords;
 
   RealEstate({
     this.id,
@@ -39,6 +41,7 @@ class RealEstate extends Equatable {
     this.condition,
     this.price = 0,
     this.floor,
+    this.coords,
     this.rooms = 0,
     this.iswithSalon = false,
     this.iswithSofa = false,
@@ -105,9 +108,17 @@ class RealEstate extends Equatable {
     parseObject.set<String?>('furnishing', furnishingString);
     parseObject.set<bool?>('isOffice', realEstate.isOffice);
     parseObject.set<List?>('features', featuresArray);
+
+    if (coords != null) {
+      parseObject.set<ParseGeoPoint?>(
+        'mapLocation',
+        ParseGeoPoint(latitude: coords!.latitude, longitude: coords!.longitude),
+      );
+    }
+
     parseObject.set<String?>(
         'additional_information', realEstate.additionalInformation);
-    parseObject.set<List?>('gallary', realEstate.gallary);
+    parseObject.set<List<String>?>('gallary', realEstate.gallary);
     parseObject.set<String?>('requestStatus', requestStatusString);
 
     if (realEstate.createdBy == null) {
@@ -128,6 +139,8 @@ class RealEstate extends Equatable {
       );
     }
 
+    final geoPoint = parseObject.get<ParseGeoPoint?>('mapLocation');
+
     return RealEstate(
       id: parseObject.objectId,
       type: enumFromString(Types.values, parseObject.get<String>('type')),
@@ -135,6 +148,9 @@ class RealEstate extends Equatable {
           PropertyType.values, parseObject.get<String>('propertyType')),
       locationArea: parseObject.get<String>('locationArea'),
       locationMark: parseObject.get<String>('locationMark'),
+      coords: geoPoint == null
+          ? null
+          : LatLng(geoPoint.latitude, geoPoint.longitude),
       price: parseObject.get<int>('price') ?? 0,
       floor: parseObject.get<int>('floor'),
       rooms: parseObject.get<int>('rooms') ?? 0,
@@ -190,10 +206,12 @@ class RealEstate extends Equatable {
   }
 
   static RegExp reg = RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))');
+
   String mathFunc(Match match) => '${match[1]},';
 
   String get getPrice =>
       "${price.toString().replaceAllMapped(reg, mathFunc)} ل.س";
+
   String? get getFloor => ordinalsAr(floor);
 
   RealEstate copyWith({

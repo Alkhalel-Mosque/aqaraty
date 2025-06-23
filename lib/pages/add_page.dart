@@ -1,9 +1,8 @@
+import 'package:aqaraty/components/image_pick.dart';
 import 'package:aqaraty/components/my_map.dart';
 import 'package:aqaraty/components/my_snackbar.dart';
 import 'package:aqaraty/provider/notifiers.dart';
-import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:latlong2/latlong.dart';
 import '../../enums/enums.dart';
 import '../../extensions/extension.dart';
 import '../../models/real_estate.dart';
@@ -17,6 +16,7 @@ import 'package:flutter/material.dart';
 
 class AddPage extends ConsumerStatefulWidget {
   final RealEstate? realEstate;
+
   const AddPage({
     super.key,
     this.realEstate,
@@ -34,10 +34,12 @@ class _AddPageState extends ConsumerState<AddPage> {
     direction: [],
     features: [],
   );
+  
   RealEstate draft = RealEstate(
     direction: [],
     features: [],
   );
+
   @override
   void initState() {
     if (widget.realEstate != null) {
@@ -127,16 +129,20 @@ class _AddPageState extends ConsumerState<AddPage> {
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
+      
       onWillPop: () async {
         final res =
             (widget.realEstate != null && widget.realEstate != realEstate) ||
                 (realEstate != draft);
+
         if (res) {
           return await MySnackBar.showYesNoDialog(context, "هل تود الخروج ؟");
         }
         return true;
       },
+
       child: Scaffold(
+
         appBar: AppBar(
           title: const Text("إضافة عقار"),
           actions: [
@@ -146,13 +152,16 @@ class _AddPageState extends ConsumerState<AddPage> {
                     editable = !editable;
                     setState(() {});
                   },
-                  icon: Icon(Icons.edit)),
+                  icon: const Icon(Icons.edit)),
             if (widget.realEstate != null)
-              IconButton(onPressed: _deleteRealEstate, icon: Icon(Icons.delete))
+              IconButton(onPressed: _deleteRealEstate, icon: const Icon(Icons.delete))
           ],
         ),
+        
         body: Padding(
+        
           padding: const EdgeInsets.all(8.0),
+        
           child: ListView(
             children: [
               10.getHightSizedBox,
@@ -206,7 +215,15 @@ class _AddPageState extends ConsumerState<AddPage> {
               10.getHightSizedBox,
               ClipRRect(
                 borderRadius: BorderRadius.circular(15),
-                child: SizedBox(height: 200, child: My_map()),
+                child: SizedBox(
+                    height: 200,
+                    child: MyMap(
+                      coords: realEstate.coords,
+                      onSave: (p0) {
+                        print(p0);
+                        realEstate.coords = p0;
+                      },
+                    )),
               ),
               10.getHightSizedBox,
               MyTextFormField(
@@ -460,6 +477,19 @@ class _AddPageState extends ConsumerState<AddPage> {
                     realEstate.officePhone = p0;
                   },
                 ),
+              // ImageView(images: realEstate.gallary ?? []),
+              10.getHightSizedBox,
+              EnhancedImageCompressor(
+                isEdit: editable,
+                initialImageUrls: realEstate.gallary ?? [],
+                onFilePicked: (files) {
+                  realEstate.gallary = files
+                      .map(
+                        (e) => e.path,
+                      )
+                      .toList();
+                },
+              ),
               if (realEstate.isOffice) 10.getHightSizedBox,
               if (editable)
                 CustomTextButton(
@@ -471,6 +501,7 @@ class _AddPageState extends ConsumerState<AddPage> {
               50.getHightSizedBox,
             ],
           ),
+        
         ),
       ),
     );

@@ -1,4 +1,5 @@
 import 'dart:developer';
+import 'dart:io';
 
 import 'package:aqaraty/models/real_estate.dart';
 import 'package:parse_server_sdk_flutter/parse_server_sdk_flutter.dart';
@@ -44,6 +45,31 @@ class Api {
     }
   }
 
+  Future<List<String>> uploadImages(List<String> imageFiles) async {
+    // Handle image upload
+    List<String> imageUrls = [];
+
+    for (final imageFile in imageFiles) {
+      if (imageFile.startsWith("https")) {
+        imageUrls.add(imageFile);
+        continue;
+      }
+      final file = File(imageFile);
+      final parseFile = ParseFile(file);
+
+      // Upload image to server
+      var response = await parseFile.save();
+      if (response.success) {
+        var fileUrl = (response.result as ParseFile).url;
+        imageUrls.add(fileUrl!);
+      } else {
+        print('Failed to upload image: ${response.error?.message}');
+      }
+    }
+   
+    return imageUrls;
+  }
+
   Future<bool> updateRealEstate(RealEstate realEstate) async {
     try {
       // 1. Convert to ParseObject
@@ -56,6 +82,7 @@ class Api {
         throw Exception('Update failed: ${response.error?.message}');
       }
 
+      await uploadImages(realEstate.gallary ?? []);
       print('Successfully updated object: ${response.result.objectId}');
       return true;
     } catch (e) {
@@ -82,12 +109,14 @@ class Api {
 
   Future<bool> updatePropertyWithPermissionCheck(RealEstate realEstate) async {
     try {
+      final galary = await uploadImages(realEstate.gallary ?? []);
+      realEstate.gallary = galary;
       final ParseCloudFunction function =
           ParseCloudFunction('updateRealEstate');
 
       final Map<String, dynamic> params =
           (await realEstate.realEstateToParseObject(realEstate)).toJson();
-      log(params.toString());
+
       final ParseResponse result = await function.execute(parameters: params);
 
       if (result.success && result.result != null) {

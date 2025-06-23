@@ -3,7 +3,9 @@ import 'package:aqaraty/enums/enums.dart';
 import 'package:aqaraty/models/real_estate.dart';
 import 'package:aqaraty/pages/add_page.dart';
 import 'package:aqaraty/router/router.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 
 class RealestateCard extends StatelessWidget {
   const RealestateCard({super.key, required this.realEstate});
@@ -42,7 +44,7 @@ class RealestateCard extends StatelessWidget {
           child: Stack(
             alignment: Alignment.bottomCenter,
             children: [
-              const CustomImage(path: "assets/images/house_sample.jpg"),
+              CustomImage(path: realEstate.gallary?.firstOrNull),
               Container(
                 width: double.infinity,
                 decoration: BoxDecoration(

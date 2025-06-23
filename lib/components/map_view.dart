@@ -1,9 +1,12 @@
+
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 
 class MapView extends StatefulWidget {
-  const MapView({super.key});
+  final LatLng? coords;
+  final void Function(LatLng?) onSave;
+  const MapView({super.key, this.coords,required this.onSave});
 
   @override
   State<MapView> createState() => _MapViewState();
@@ -12,7 +15,7 @@ class MapView extends StatefulWidget {
 class _MapViewState extends State<MapView> {
   final MapController ctl = MapController();
 
-  LatLng? markerPosition;
+  late LatLng? markerPosition = widget.coords;
   bool isSelecting = false;
 
   void _startSelection() {
@@ -30,6 +33,7 @@ class _MapViewState extends State<MapView> {
 
   void _confirmLocation() {
     if (markerPosition != null) {
+      widget.onSave.call(markerPosition);
       Navigator.pop(context, markerPosition);
     }
   }
@@ -42,7 +46,7 @@ class _MapViewState extends State<MapView> {
           FlutterMap(
             mapController: ctl,
             options: MapOptions(
-              center: LatLng(33.5449, 36.3233),
+              center: markerPosition??LatLng(33.5449, 36.3233),
               zoom: 17,
               onTap: (tapPosition, latlng) {
                 if (isSelecting) {
