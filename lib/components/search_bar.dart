@@ -1,10 +1,9 @@
-import 'package:aqaraty/components/filter_button.dart';
 import 'package:aqaraty/models/real_estate.dart';
 import 'package:aqaraty/pages/search_page.dart';
 import 'package:aqaraty/router/router.dart';
 import 'package:flutter/material.dart';
 
-class CustomSearchBar<T> extends StatelessWidget {
+class CustomSearchBar extends StatelessWidget {
   const CustomSearchBar({
     super.key,
     this.onSearch,
@@ -16,27 +15,29 @@ class CustomSearchBar<T> extends StatelessWidget {
     this.resultBuilder,
     required this.allEstates,
   });
-  final List<T> Function(dynamic)? onSearch;
+
+  final List<RealEstate> Function(dynamic)? onSearch;
   final String hint;
   final String title;
   final bool showLeading;
   final Widget? leading;
   final Widget? trailing;
-  final Widget Function(BuildContext, int, T)? resultBuilder;
-  final List<T> allEstates;
+  final Widget Function(BuildContext, int, RealEstate)? resultBuilder;
+  final List<RealEstate> allEstates;
 
   @override
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surfaceContainer,
-          borderRadius: BorderRadius.circular(100)),
+        color: Theme.of(context).colorScheme.surfaceContainer,
+        borderRadius: BorderRadius.circular(100),
+      ),
       constraints: const BoxConstraints(minHeight: 50),
       child: InkWell(
         borderRadius: BorderRadius.circular(100),
         onTap: () {
           context.myPush(
-            SearchScreen<T>(
+            SearchScreen<RealEstate>(
               allEstates: allEstates,
               onSearch: onSearch,
               hint: hint,
@@ -47,21 +48,20 @@ class CustomSearchBar<T> extends StatelessWidget {
         child: Row(
           textDirection: TextDirection.rtl,
           children: [
-            leading != null
-                ? leading!
-                : IconButton(
-                    onPressed: () {
-                      Scaffold.of(context).openDrawer();
-                    },
-                    icon: const Icon(Icons.menu),
-                  ),
+            leading ??
+                IconButton(
+                  onPressed: () {
+                    Scaffold.of(context).openDrawer();
+                  },
+                  icon: const Icon(Icons.menu),
+                ),
             Expanded(
               child: Text(
                 title,
                 style: Theme.of(context).textTheme.titleLarge,
               ),
             ),
-            const IconButton(onPressed: null, icon: Icon(Icons.search))
+            const IconButton(onPressed: null, icon: Icon(Icons.search)),
           ],
         ),
       ),

@@ -1,9 +1,11 @@
-import 'package:aqaraty/components/my_list_filter.dart';
+import 'package:aqaraty/components/filter_drawer.dart';
+
 import 'package:aqaraty/models/real_estate.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class SearchScreen<T> extends ConsumerStatefulWidget {
+class SearchScreen<T extends RealEstate> extends ConsumerStatefulWidget {
   const SearchScreen({
     super.key,
     this.onSearch,
@@ -21,7 +23,8 @@ class SearchScreen<T> extends ConsumerStatefulWidget {
   ConsumerState<SearchScreen<T>> createState() => _SearchScreenState<T>();
 }
 
-class _SearchScreenState<T> extends ConsumerState<SearchScreen<T>> {
+class _SearchScreenState<T extends RealEstate>
+    extends ConsumerState<SearchScreen<T>> {
   final TextEditingController _controller = TextEditingController();
 
   List<T> filteredList = [];
@@ -45,8 +48,19 @@ class _SearchScreenState<T> extends ConsumerState<SearchScreen<T>> {
   }
 
   @override
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
+      drawer: FilterDrawer(
+        allEstates: widget.allEstates.cast<RealEstate>(),
+        onFilterChanged: (filteredEstates) {
+          setState(() {
+            filteredList = filteredEstates.cast<T>();
+            updateResult();
+          });
+          Navigator.of(context).maybePop();
+        },
+      ),
       body: Column(
         children: [
           Container(
@@ -85,21 +99,21 @@ class _SearchScreenState<T> extends ConsumerState<SearchScreen<T>> {
               ),
             ),
           ),
-          SizedBox(
-            height: 50,
-            child: Padding(
-              padding: const EdgeInsets.only(top: 10),
-              child: MyListFilter(
-                allEstates: widget.allEstates.cast<RealEstate>(),
-                onFilterChanged: (filtered) {
-                  setState(() {
-                    filteredList = filtered.cast<T>();
-                  });
-                  updateResult();
-                },
-              ),
-            ),
-          ),
+          // SizedBox(
+          //   height: 50,
+          //   child: Padding(
+          //     padding: const EdgeInsets.only(top: 10),
+          //     child: MyListFilter(
+          //       allEstates: widget.allEstates.cast<RealEstate>(),
+          //       onFilterChanged: (filtered) {
+          //         setState(() {
+          //           filteredList = filtered.cast<T>();
+          //         });
+          //         updateResult();
+          //       },
+          //     ),
+          //   ),
+          // ),
           if (result.isNotEmpty)
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 8.0),

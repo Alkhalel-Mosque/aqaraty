@@ -81,126 +81,126 @@ class _MyListFilterState extends State<MyListFilter> {
       shrinkWrap: true,
       scrollDirection: Axis.horizontal,
       children: [
-        FilterButtonTile<Types>(
-          title: " نوع المعاملة ",
-          values: Types.values,
-          selectedValues: selectedtypes,
-          getLabel: (e) => e.arName,
-          onApply: (vals) => setState(() {
-            selectedtypes = vals;
-            filterEstates();
-          }),
-        ),
-        FilterButtonTile<PropertyType>(
-          title: "نوع العقار",
-          values: PropertyType.values,
-          selectedValues: selectedPropertyTypes,
-          getLabel: (e) => e.arName,
-          onApply: (vals) => setState(() {
-            selectedPropertyTypes = vals;
-            filterEstates();
-          }),
-        ),
-        FilterButtonTile<Condition>(
-          title: "الحالة",
-          values: Condition.values,
-          selectedValues: selectedConditions,
-          getLabel: (e) => e.arName,
-          onApply: (vals) => setState(() {
-            selectedConditions = vals;
-            filterEstates();
-          }),
-        ),
-        FilterButtonTile<Furnishing>(
-          title: "الفرش",
-          values: Furnishing.values,
-          selectedValues: selectedFurnishings,
-          getLabel: (e) => e.arName,
-          onApply: (vals) => setState(() {
-            selectedFurnishings = vals;
+        // FilterButtonTile<Types>(
+        //   title: " نوع المعاملة ",
+        //   values: Types.values,
+        //   selectedValues: selectedtypes,
+        //   getLabel: (e) => e.arName,
+        //   onApply: (vals) => setState(() {
+        //     selectedtypes = vals;
+        //     filterEstates();
+        //   }),
+        // ),
+        // FilterButtonTile<PropertyType>(
+        //   title: "نوع العقار",
+        //   values: PropertyType.values,
+        //   selectedValues: selectedPropertyTypes,
+        //   getLabel: (e) => e.arName,
+        //   onApply: (vals) => setState(() {
+        //     selectedPropertyTypes = vals;
+        //     filterEstates();
+        //   }),
+        // ),
+        // FilterButtonTile<Condition>(
+        //   title: "الحالة",
+        //   values: Condition.values,
+        //   selectedValues: selectedConditions,
+        //   getLabel: (e) => e.arName,
+        //   onApply: (vals) => setState(() {
+        //     selectedConditions = vals;
+        //     filterEstates();
+        //   }),
+        // ),
+        // FilterButtonTile<Furnishing>(
+        //   title: "الفرش",
+        //   values: Furnishing.values,
+        //   selectedValues: selectedFurnishings,
+        //   getLabel: (e) => e.arName,
+        //   onApply: (vals) => setState(() {
+        //     selectedFurnishings = vals;
 
-            filterEstates();
-          }),
-        ),
-        FilterButtonTile<Direction>(
-          title: "الاتجاهات",
-          values: Direction.values,
-          selectedValues: selectedDirections,
-          getLabel: (e) => e.arName,
-          onApply: (vals) => setState(() {
-            selectedDirections = vals;
+        //     filterEstates();
+        //   }),
+        // ),
+        // FilterButtonTile<Direction>(
+        //   title: "الاتجاهات",
+        //   values: Direction.values,
+        //   selectedValues: selectedDirections,
+        //   getLabel: (e) => e.arName,
+        //   onApply: (vals) => setState(() {
+        //     selectedDirections = vals;
 
-            filterEstates();
-          }),
-        ),
-        IntRangeFilterButton(
-          title: 'السعر',
-          initialMin: minPrice,
-          initialMax: maxPrice,
-          onApply: (min, max) {
-            setState(() {
-              minPrice = min;
-              maxPrice = max;
-              filterEstates();
-            });
-          },
-        ),
-        const SizedBox(width: 10),
-        IntRangeFilterButton(
-          title: 'المساحة',
-          initialMin: minArea,
-          initialMax: maxArea,
-          onApply: (min, max) {
-            setState(() {
-              minArea = min;
-              maxArea = max;
-              filterEstates();
-            });
-          },
-        ),
-        const SizedBox(width: 10),
-        IntRangeFilterButton(
-          title: 'عدد الغرف',
-          initialMin: minRooms,
-          initialMax: maxRooms,
-          onApply: (min, max) {
-            setState(() {
-              minRooms = min;
-              maxRooms = max;
-              filterEstates();
-            });
-          },
-        ),
-        BoolFilterButton(
-          title: "صالون",
-          value: isWithSalon,
-          onApply: (val) {
-            setState(() {
-              isWithSalon = val;
-              filterEstates();
-            });
-          },
-        ),
-        BoolFilterButton(
-          title: "صوفا",
-          value: isWithSofa,
-          onApply: (val) {
-            setState(() {
-              isWithSofa = val;
-              filterEstates();
-            });
-          },
-        ),
-        BoolFilterButton(
-          title: "مكتب",
-          value: isOffice,
-          onApply: (val) {
-            setState(() {
-              isOffice = val;
-              filterEstates();
-            });
-          },
-        ),
+        //     filterEstates();
+        //   }),
+        // ),
+        // IntRangeFilterButton(
+        //   title: 'السعر',
+        //   initialMin: minPrice,
+        //   initialMax: maxPrice,
+        //   onApply: (min, max) {
+        //     setState(() {
+        //       minPrice = min;
+        //       maxPrice = max;
+        //       filterEstates();
+        //     });
+        //   },
+        // ),
+        // const SizedBox(width: 10),
+        // IntRangeFilterButton(
+        //   title: 'المساحة',
+        //   initialMin: minArea,
+        //   initialMax: maxArea,
+        //   onApply: (min, max) {
+        //     setState(() {
+        //       minArea = min;
+        //       maxArea = max;
+        //       filterEstates();
+        //     });
+        //   },
+        // ),
+        // const SizedBox(width: 10),
+        // IntRangeFilterButton(
+        //   title: 'عدد الغرف',
+        //   initialMin: minRooms,
+        //   initialMax: maxRooms,
+        //   onApply: (min, max) {
+        //     setState(() {
+        //       minRooms = min;
+        //       maxRooms = max;
+        //       filterEstates();
+        //     });
+        //   },
+        // ),
+        // BoolFilterButton(
+        //   title: "صالون",
+        //   value: isWithSalon,
+        //   onApply: (val) {
+        //     setState(() {
+        //       isWithSalon = val;
+        //       filterEstates();
+        //     });
+        //   },
+        // ),
+        // BoolFilterButton(
+        //   title: "صوفا",
+        //   value: isWithSofa,
+        //   onApply: (val) {
+        //     setState(() {
+        //       isWithSofa = val;
+        //       filterEstates();
+        //     });
+        //   },
+        // ),
+        // BoolFilterButton(
+        //   title: "مكتب",
+        //   value: isOffice,
+        //   onApply: (val) {
+        //     setState(() {
+        //       isOffice = val;
+        //       filterEstates();
+        //     });
+        //   },
+        // ),
       ],
     );
   }

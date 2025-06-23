@@ -1,89 +1,68 @@
-import 'package:aqaraty/extensions/extension.dart';
 import 'package:flutter/material.dart';
 
-class FilterButtonTile<T> extends StatelessWidget {
-  final String title;
-  final List<T> values;
-  final List<T> selectedValues;
-  final String Function(T) getLabel;
-  final void Function(List<T>) onApply;
-
-  const FilterButtonTile({
-    super.key,
-    required this.title,
-    required this.values,
-    required this.selectedValues,
-    required this.getLabel,
-    required this.onApply,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final isSelected = selectedValues.isNotEmpty;
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 2),
-      child: ElevatedButton(
-        style: ElevatedButton.styleFrom(
-            side: const BorderSide(color: Colors.white, width: 0.3),
-            backgroundColor: isSelected
-                ? const Color.fromARGB(47, 68, 137, 255)
-                : theme.primaryColor),
-        onPressed: () {
-          showModalBottomSheet(
-            context: context,
-            isScrollControlled: true,
-            builder: (_) {
-              List<T> tempSelected = [...selectedValues];
-              return StatefulBuilder(
-                builder: (context, setState) {
-                  return Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text("اختر $title",
-                            style: const TextStyle(fontSize: 18)),
-                        const SizedBox(height: 10),
-                        ...values.map((val) {
-                          return CheckboxListTile(
-                            title: Text(getLabel(val)),
-                            value: tempSelected.contains(val),
-                            onChanged: (isChecked) {
-                              setState(() {
-                                if (isChecked == true) {
-                                  tempSelected.add(val);
-                                } else {
-                                  tempSelected.remove(val);
-                                }
-                              });
-                            },
-                          );
-                        }),
-                        const SizedBox(height: 10),
-                        ElevatedButton(
-                          onPressed: () {
-                            onApply(tempSelected);
-                            Navigator.pop(context);
-                          },
-                          child: const Text("تطبيق"),
-                        ),
-                      ],
-                    ),
-                  );
-                },
-              );
-            },
-          );
+Widget buildMultiSelect<T>({
+  required String title,
+  required List<T> options,
+  required List<T> selectedValues,
+  required Function(List<T>) onChanged,
+  required String Function(T) getLabel,
+}) {
+  return ExpansionTile(
+    title: Text(title),
+    children: options.map((option) {
+      final isSelected = selectedValues.contains(option);
+      return CheckboxListTile(
+        value: isSelected,
+        title: Text(getLabel(option)),
+        onChanged: (val) {
+          final newList = List<T>.from(selectedValues);
+          if (val == true) {
+            newList.add(option);
+          } else {
+            newList.remove(option);
+          }
+          onChanged(newList);
         },
-        child: Row(
-          children: [
-            2.getWidthSizedBox,
-            Text(title),
-            const Icon(Icons.arrow_drop_down_rounded),
-          ],
+      );
+    }).toList(),
+  );
+}
+
+Widget buildRangeInput(String label, TextEditingController minCtrl,
+    TextEditingController maxCtrl) {
+  return Row(
+    children: [
+      Expanded(child: Text(label)),
+      Expanded(
+        child: TextField(
+          controller: minCtrl,
+          keyboardType: TextInputType.number,
+          decoration: const InputDecoration(labelText: "من"),
         ),
       ),
-    );
-  }
+      Expanded(
+        child: TextField(
+          controller: maxCtrl,
+          keyboardType: TextInputType.number,
+          decoration: const InputDecoration(labelText: "إلى"),
+        ),
+      ),
+    ],
+  );
+}
+
+Widget buildBooleanDropdown(
+    String label, bool? value, Function(bool?) onChanged) {
+  return ListTile(
+    title: Text(label),
+    trailing: DropdownButton<bool?>(
+      value: value,
+      items: const [
+        DropdownMenuItem(value: null, child: Text("الكل")),
+        DropdownMenuItem(value: true, child: Text("نعم")),
+        DropdownMenuItem(value: false, child: Text("لا")),
+      ],
+      onChanged: (val) => onChanged(val),
+    ),
+  );
 }
