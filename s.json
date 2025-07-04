@@ -4,11 +4,11 @@
         "objectId": "iSP6I4tLAf",
         "createdAt": "2025-05-09T14:23:28.303Z",
         "updatedAt": "2025-05-09T17:01:53.596Z",
-        "mapLocation": {
-            "__type": "GeoPoint",
-            "latitude": 0.0,
-            "longitude": 0.0
-        },
+        "mapLocation": [
+            "https://parsefiles.back4app.com/hhfftwGWHUZ4xDgoEveepbg8D25dUZqMDQJtvRp7/7a02803f07ad453135e5a63f1d14cb28_1748564498783.jpg",
+            "https://parsefiles.back4app.com/hhfftwGWHUZ4xDgoEveepbg8D25dUZqMDQJtvRp7/153d48d04d55f94374f2c7968c4a16d0_1748564498808.jpg",
+            "https://parsefiles.back4app.com/hhfftwGWHUZ4xDgoEveepbg8D25dUZqMDQJtvRp7/343bd70f265a61657532eeb5f5bbe14e_1748564498919.jpg"
+        ],
         "direction": {
             "className": "ParseArray",
             "estimatedArray": [

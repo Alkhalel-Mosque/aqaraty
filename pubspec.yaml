@@ -35,6 +35,13 @@ dependencies:
   permission_handler: ^10.0.0
   equatable: ^2.0.5
   font_awesome_flutter: ^10.1.0
+  image_picker: ^1.1.2
+  flutter_image_compress: ^2.4.0
+  open_file: ^3.5.10
+  flutter_cache_manager: ^3.3.1
+  cached_network_image: ^3.3.1
+  path_provider: ^2.1.5
+  photo_view: ^0.15.0
 
 dev_dependencies:
   flutter_test:

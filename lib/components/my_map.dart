@@ -4,23 +4,42 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 
-class My_map extends StatelessWidget {
-  const My_map({super.key});
+class MyMap extends StatefulWidget {
+  final LatLng? coords;
+  final void Function(LatLng?) onSave;
+
+  const MyMap({super.key, this.coords, required this.onSave});
 
   @override
+  State<MyMap> createState() => _MyMapState();
+}
+
+class _MyMapState extends State<MyMap> {
+  late LatLng? lat = widget.coords;
+  final ctl = MapController();
+  @override
   Widget build(BuildContext context) {
-    LatLng? lat;
-    final ctl = MapController();
     return GestureDetector(
       onTap: () {
-        context.myPush(MapView());
+        context.myPush(MapView(
+          coords: lat,
+          onSave: (p1) {
+            lat = p1;
+            widget.onSave.call(p1);
+            if (p1!=null) {
+            ctl.move(p1, 17);
+              
+            }
+            setState(() {});
+          },
+        ));
       },
       child: AbsorbPointer(
         child: FlutterMap(
           mapController: ctl,
           options: MapOptions(
             interactiveFlags: InteractiveFlag.none,
-            center: LatLng(33.5449, 36.3233), // Damascus coordinates
+            center:lat?? LatLng(33.5449, 36.3233), // Damascus coordinates
             zoom: 17,
           ),
           children: [
@@ -41,24 +60,6 @@ class My_map extends StatelessWidget {
                 ),
               ],
             ),
-            MarkerLayer(
-              markers: [
-                Marker(
-                  point: LatLng(33.545405, 36.322474),
-                  builder: (ctx) => Icon(Icons.location_pin, color: Colors.red),
-                ),
-              ],
-            ),
-
-            // MarkerLayer(
-            //   markers: [
-            //     Marker(
-            //       point: LatLng(_currentPosition?.latitude??0, _currentPosition?.longitude??0),
-            //       builder: (ctx) =>
-            //           Icon(Icons.location_pin, color: Colors.blue),
-            //     ),
-            //   ],
-            // ),
           ],
         ),
       ),
