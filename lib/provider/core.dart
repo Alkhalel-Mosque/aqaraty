@@ -35,19 +35,12 @@ class CoreProvider extends ChangeNotifier {
   addRealEstate(RealEstate realEstate) async {
     try {
       final res = await api.addRealEstate(realEstate);
+      if (res is String) {
+        realEstate.id = res;
+        realEstates.add(realEstate);
+      }
       notifyListeners();
-      return res;
-    } catch (e) {
-      CustomToast.showToast(e.toString());
-      return false;
-    }
-  }
-
-  updateRealEstate(RealEstate realEstate) async {
-    try {
-      final res = await api.updateRealEstate(realEstate);
-      notifyListeners();
-      return res;
+      return res is String;
     } catch (e) {
       CustomToast.showToast(e.toString());
       return false;
@@ -57,6 +50,10 @@ class CoreProvider extends ChangeNotifier {
   newupdateRealEstate(RealEstate realEstate) async {
     try {
       final res = await api.updatePropertyWithPermissionCheck(realEstate);
+      realEstates.removeWhere(
+        (e) => e.id == realEstate.id,
+      );
+      realEstates.add(realEstate);
       notifyListeners();
       return res;
     } catch (e) {

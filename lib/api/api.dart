@@ -34,12 +34,15 @@ class Api {
     }
   }
 
-  Future<bool> addRealEstate(RealEstate realEstate) async {
+  Future<String?> addRealEstate(RealEstate realEstate) async {
     final data = await realEstate.realEstateToParseObject(realEstate);
     // Save the object
     final res = await data.save();
+
     if (res.success) {
-      return true;
+      final object = res.result as ParseObject;
+
+      return object.objectId;
     } else {
       throw Exception('Failed to fetch data: ${res.error?.message}');
     }
@@ -66,7 +69,7 @@ class Api {
         print('Failed to upload image: ${response.error?.message}');
       }
     }
-   
+
     return imageUrls;
   }
 

@@ -127,6 +127,10 @@ class _LoginPageState extends State<LoginPage> {
           child: Column(
             children: [
               TextFormField(
+                autofillHints: [
+                  AutofillHints.username,
+                  AutofillHints.newUsername
+                ],
                 controller: _usernameController,
                 decoration: InputDecoration(
                   labelText: "Username",
@@ -141,6 +145,10 @@ class _LoginPageState extends State<LoginPage> {
               ),
               SizedBox(height: 16),
               TextFormField(
+                autofillHints: [
+                  AutofillHints.password,
+                  AutofillHints.newPassword
+                ],
                 controller: _passwordController,
                 obscureText: true, // Hide password
                 decoration: InputDecoration(

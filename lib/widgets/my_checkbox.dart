@@ -28,10 +28,12 @@ class MyCheckBox extends StatelessWidget {
         borderRadius: BorderRadius.circular(15),
         color: theme.colorScheme.surfaceContainer,
       ),
-      margin: const EdgeInsets.symmetric(vertical: 4.0),
+      margin: const EdgeInsets.symmetric(vertical: 2.0),
       child: CheckboxListTile(
         value: val,
         enabled: editable,
+        contentPadding: EdgeInsets.only(right: 10),
+
         activeColor: Colors.transparent,
         // fillColor: const WidgetStatePropertyAll(Colors.transparent),
         checkColor: theme.colorScheme.primary,

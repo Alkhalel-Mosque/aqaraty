@@ -14,6 +14,7 @@ class RealEstate extends Equatable {
   int? floor;
   int rooms;
   bool iswithSalon;
+  bool iswithRoof;
   bool iswithSofa;
   int? area;
   List<Direction>? direction;
@@ -36,13 +37,14 @@ class RealEstate extends Equatable {
     this.id,
     this.type,
     this.propertyType,
-    this.locationArea,
+    this.locationArea ,
     this.locationMark,
     this.condition,
     this.price = 0,
     this.floor,
     this.coords,
     this.rooms = 0,
+    this.iswithRoof = false,
     this.iswithSalon = false,
     this.iswithSofa = false,
     this.area,
@@ -97,6 +99,7 @@ class RealEstate extends Equatable {
     parseObject.set<int?>('rooms', realEstate.rooms);
     parseObject.set<bool?>('iswithSalon', realEstate.iswithSalon);
     parseObject.set<bool?>('iswithSofa', realEstate.iswithSofa);
+    parseObject.set<bool?>('iswithRoof', realEstate.iswithRoof);
     parseObject.set<int?>('area', realEstate.area);
     parseObject.set<List?>('direction', directionsArray);
     parseObject.set<String?>('ownershipType', ownershipTypeString);
@@ -155,6 +158,7 @@ class RealEstate extends Equatable {
       floor: parseObject.get<int>('floor'),
       rooms: parseObject.get<int>('rooms') ?? 0,
       iswithSalon: parseObject.get<bool>('iswithSalon') ?? false,
+      iswithRoof: parseObject.get<bool>('iswithRoof') ?? false,
       iswithSofa: parseObject.get<bool>('iswithSofa') ?? false,
       area: parseObject.get<int>('area'),
       direction: (parseObject.get<List<dynamic>>('direction') ?? [])
@@ -225,6 +229,7 @@ class RealEstate extends Equatable {
     int? rooms,
     bool? iswithSalon,
     bool? iswithSofa,
+    bool? iswithRoof,
     int? area,
     List<Direction>? direction,
     OwnershipType? ownershipType,
@@ -240,15 +245,18 @@ class RealEstate extends Equatable {
     List<String>? gallary,
     User? createdBy,
     RequestStatus? requestStatus,
+    LatLng? coords,
   }) {
     return RealEstate(
       id: id ?? this.id,
       type: type ?? this.type,
+      coords: coords ?? this.coords,
       propertyType: propertyType ?? this.propertyType,
       locationArea: locationArea ?? this.locationArea,
       locationMark: locationMark ?? this.locationMark,
       price: price ?? this.price,
       floor: floor ?? this.floor,
+      iswithRoof: iswithRoof ?? this.iswithRoof,
       rooms: rooms ?? this.rooms,
       iswithSalon: iswithSalon ?? this.iswithSalon,
       iswithSofa: iswithSofa ?? this.iswithSofa,
@@ -376,3 +384,13 @@ String? ordinalsAr(int? num, {bool isFeminine = false}) {
     ][(num ~/ 10)]}ون";
   }
 }
+
+final List<String> locations = [
+  "مساكن برزة",
+  "برزة",
+  "حاميش",
+  "القابون",
+  "أبو جرش",
+  "ركن الدين",
+  "معربا",
+];

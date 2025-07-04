@@ -93,13 +93,25 @@ class _MyTextFormFieldState extends State<MyTextFormField> {
         autovalidateMode: AutovalidateMode.onUserInteraction,
         decoration: InputDecoration(
           filled: true,
+          label: RichText(
+            text: TextSpan(
+              text: widget.labelText,
+              style: TextStyle(color: Theme.of(context).colorScheme.primary,fontSize: 20),
+              children: const [
+                TextSpan(
+                  text: ' *',
+                  style: TextStyle(color: Colors.red),
+                ),
+              ],
+            ),
+          ),
           fillColor: Theme.of(context).colorScheme.surfaceContainer,
           border: const OutlineInputBorder(
               borderSide: BorderSide.none,
               borderRadius: BorderRadius.all(Radius.circular(15))),
           contentPadding: const EdgeInsets.all(10),
           labelStyle: TextStyle(color: Theme.of(context).colorScheme.primary),
-          labelText: widget.labelText,
+          // labelText: widget.labelText,
           prefixIcon: widget.preIcon,
           suffixIcon: widget.suffixIcon,
         ),

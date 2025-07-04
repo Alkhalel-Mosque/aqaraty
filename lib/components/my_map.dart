@@ -17,6 +17,13 @@ class MyMap extends StatefulWidget {
 class _MyMapState extends State<MyMap> {
   late LatLng? lat = widget.coords;
   final ctl = MapController();
+  void _ondelete() {
+    setState(() {
+      lat = null;
+      widget.onSave.call(null);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -26,42 +33,51 @@ class _MyMapState extends State<MyMap> {
           onSave: (p1) {
             lat = p1;
             widget.onSave.call(p1);
-            if (p1!=null) {
-            ctl.move(p1, 17);
-              
+            if (p1 != null) {
+              ctl.move(p1, 17);
             }
             setState(() {});
           },
         ));
       },
-      child: AbsorbPointer(
-        child: FlutterMap(
-          mapController: ctl,
-          options: MapOptions(
-            interactiveFlags: InteractiveFlag.none,
-            center:lat?? LatLng(33.5449, 36.3233), // Damascus coordinates
-            zoom: 17,
-          ),
-          children: [
-            TileLayer(
-              // Bring your own tiles
-              maxZoom: 100,
-              urlTemplate:
-                  'https://tile.openstreetmap.org/{z}/{x}/{y}.png', // For demonstration only
-              userAgentPackageName:
-                  'com.example.app', // Add your app identifier
-              // And many more recommended properties!
-            ),
-            MarkerLayer(
-              markers: [
-                Marker(
-                  point: lat ?? LatLng(0, 0),
-                  builder: (ctx) => Icon(Icons.location_pin, color: Colors.red),
+      child: Stack(
+        children: [
+          AbsorbPointer(
+            child: FlutterMap(
+              mapController: ctl,
+              options: MapOptions(
+                interactiveFlags: InteractiveFlag.none,
+                center: lat ?? LatLng(33.5449, 36.3233), // Damascus coordinates
+                zoom: 17,
+              ),
+              children: [
+                TileLayer(
+                  // Bring your own tiles
+                  maxZoom: 100,
+                  urlTemplate:
+                      'https://tile.openstreetmap.org/{z}/{x}/{y}.png', // For demonstration only
+                  userAgentPackageName:
+                      'com.example.app', // Add your app identifier
+                  // And many more recommended properties!
+                ),
+                MarkerLayer(
+                  markers: [
+                    Marker(
+                      point: lat ?? LatLng(0, 0),
+                      builder: (ctx) =>
+                          Icon(Icons.location_pin, color: Colors.red),
+                    ),
+                  ],
                 ),
               ],
             ),
-          ],
-        ),
+          ),
+          if (lat != null)
+            IconButton(
+              onPressed: _ondelete,
+              icon: Icon(Icons.delete, color: Colors.red),
+            ),
+        ],
       ),
     );
   }

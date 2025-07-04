@@ -9,17 +9,19 @@ class CustomImage extends StatelessWidget {
   Widget build(BuildContext context) {
     return ClipRRect(
       borderRadius: BorderRadius.circular(10),
-      child: CachedNetworkImage(
-        imageUrl: path ?? "assets/images/house_sample.jpg",
-        height: 250,
-        fit: BoxFit.cover,
-        placeholder: (context, url) => Container(
-          color: Colors.grey[200],
-          child: const Center(child: CircularProgressIndicator()),
-        ),
-        errorWidget: (context, url, error) => const Icon(Icons.error),
-        cacheManager: DefaultCacheManager(),
-      ),
+      child: path == null
+          ? Image.asset("assets/images/logo.png",fit: BoxFit.cover,height: 200,)
+          : CachedNetworkImage(
+              imageUrl: path! ,
+              height: 250,
+              fit: BoxFit.cover,
+              placeholder: (context, url) => Container(
+                color: Colors.grey[200],
+                child: const Center(child: CircularProgressIndicator()),
+              ),
+              errorWidget: (context, url, error) => const Icon(Icons.error),
+              cacheManager: DefaultCacheManager(),
+            ),
     );
   }
 }

@@ -121,11 +121,15 @@ enum PropertyType {
   shop,
   office,
   farm,
+  roof,
+  annex,
   villa;
 
   static PropertyType getFromString(String string) {
     return switch (string) {
       "شقة" => PropertyType.apartment,
+      "سطح" => PropertyType.roof,
+      "ملحق" => PropertyType.annex,
       "محل" => PropertyType.shop,
       "مكتب" => PropertyType.office,
       "مزرعة" => PropertyType.farm,
@@ -138,6 +142,8 @@ enum PropertyType {
     return switch (this) {
       PropertyType.apartment => "شقة",
       PropertyType.shop => "محل",
+      PropertyType.annex => "ملحق",
+      PropertyType.roof => "سطح",
       PropertyType.office => "مكتب",
       PropertyType.farm => "مزرعة",
       PropertyType.villa => "فيلا",

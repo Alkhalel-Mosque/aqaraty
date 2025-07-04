@@ -1,3 +1,6 @@
+import 'package:aqaraty/pages/gallery_view.dart';
+import 'package:aqaraty/router/router.dart';
+import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
@@ -31,7 +34,7 @@ class _EnhancedImageCompressorState extends State<EnhancedImageCompressor> {
   List<File> _pickedImages = [];
 
   List<String> _initialImageUrls = [];
-
+  int _currentIndex = 0;
   List<File> _compressedImages = [];
 
   bool _isCompressing = false;
@@ -127,17 +130,20 @@ class _EnhancedImageCompressorState extends State<EnhancedImageCompressor> {
     );
   }
 
-  Future<void> _openImage(dynamic image) async {
-    try {
-      if (image is String) {
-        final file = await _cacheManager.getSingleFile(image);
-        await OpenFile.open(file.path);
-      } else if (image is File) {
-        await OpenFile.open(image.path);
-      }
-    } catch (e) {
-      _showError('Could not open image: $e');
-    }
+  Future<void> _openImage(int index) async {
+    final displayItems = [..._initialImageUrls, ..._compressedImages];
+    context.myPush(GalleryView(
+      pageController: PageController(initialPage: index),
+      galleryItems: displayItems
+          .map(
+            (e) => GalleryItem(
+                id: "id", imageUrl: (e is File) ? e.path : e as String),
+          )
+          .toList(),
+      onPageChanged: (index) {
+        print('Page changed to $index');
+      },
+    ));
   }
 
   String _formatFileSize(int bytes) {
@@ -156,15 +162,48 @@ class _EnhancedImageCompressorState extends State<EnhancedImageCompressor> {
     return 0;
   }
 
+  Widget _imageWidget(dynamic image) {
+    if (image is File) {
+      return Image.file(image, fit: BoxFit.cover);
+    } else if (image is String) {
+      return CachedNetworkImage(
+        imageUrl: image,
+        fit: BoxFit.cover,
+        placeholder: (context, url) =>
+            Center(child: CircularProgressIndicator()),
+        errorWidget: (context, url, error) => Icon(Icons.error),
+      );
+    } else {
+      return Container(); // Fallback
+    }
+  }
+
+  Widget _addWidget() {
+    return InkWell(
+      onTap: _pickImages,
+      child: Container(
+        width: MediaQuery.sizeOf(context).width - 50,
+        decoration: BoxDecoration(
+          border: Border.all(color: Theme.of(context).colorScheme.primary),
+          borderRadius: BorderRadius.all(Radius.circular(15)),
+        ),
+        child: Icon(
+          Icons.add_a_photo_outlined,
+          size: 60,
+          color: Theme.of(context).colorScheme.primary,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final displayItems = [..._initialImageUrls, ..._compressedImages];
 
     return SizedBox(
-      height: 320,
+      height: displayItems.isEmpty ? 150 : 320,
       child: Column(
         children: [
-
           // Header with total info
           Padding(
             padding: const EdgeInsets.all(8.0),
@@ -172,163 +211,95 @@ class _EnhancedImageCompressorState extends State<EnhancedImageCompressor> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'Total: ${displayItems.length} image(s)',
+                  'عدد الصور: (${displayItems.length})',
                   style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
-                FutureBuilder<int>(
-                  future: Future.wait(displayItems.map(_getFileSize))
-                      .then((sizes) => sizes.fold(0, (a, b) => a)),
-                  builder: (context, snapshot) {
-                    return Text(
-                      'Size: ${snapshot.hasData ? _formatFileSize(snapshot.data!) : 'calculating...'}',
-                      style: const TextStyle(fontWeight: FontWeight.bold),
-                    );
-                  },
-                ),
+                if(widget.isEdit&&displayItems.isNotEmpty)
+                IconButton(
+                  onPressed:_pickImages,
+                  icon: Icon(Icons.add_a_photo_outlined),
+                )
               ],
             ),
           ),
 
           // Image display row
           Expanded(
-            child: displayItems.isEmpty
-                ? const Center(child: Text('No images selected'))
-                : ListView.builder(
-                    scrollDirection: Axis.horizontal,
-                    itemCount: displayItems.length,
-                    itemBuilder: (context, index) {
-                      final item = displayItems[index];
-                      final isUrl = item is String;
+              child: displayItems.isEmpty
+                  ? _addWidget()
+                  : CarouselSlider.builder(
+                      options: CarouselOptions(
+                        // height: 220,
+                        enableInfiniteScroll: false,
+                        viewportFraction: 0.8,
+                        autoPlay: false,
+                        enlargeCenterPage: true,
+                        onPageChanged: (index, reason) {
+                          setState(() => _currentIndex = index);
+                        },
+                      ),
+                      itemCount: displayItems.length,
+                      itemBuilder:
+                          (BuildContext context, int index, int pageViewIndex) {
+                        final item = displayItems[index];
 
-                      return FutureBuilder<int>(
-                        future: _getFileSize(item),
-                        builder: (context, sizeSnapshot) {
-                          return GestureDetector(
-                            onTap: () => _openImage(item),
-                            child: Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 8.0),
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Stack(
-                                    children: [
-                                      Container(
-                                        width: 180,
-                                        height: 180,
-                                        decoration: BoxDecoration(
-                                          border:
-                                              Border.all(color: Colors.grey),
-                                          borderRadius:
-                                              BorderRadius.circular(8),
+                        return FutureBuilder<int>(
+                          future: _getFileSize(item),
+                          builder: (context, sizeSnapshot) {
+                            return GestureDetector(
+                                onTap: () => _openImage(index),
+                                child: Builder(
+                                  builder: (BuildContext context) {
+                                    return Stack(
+                                      children: [
+                                        Container(
+                                          width:
+                                              MediaQuery.of(context).size.width,
+                                          margin: EdgeInsets.symmetric(
+                                              horizontal: 5.0),
+                                          child: _imageWidget(item),
                                         ),
-                                        child: isUrl
-                                            ? CachedNetworkImage(
-                                                imageUrl: item,
-                                                fit: BoxFit.cover,
-                                                cacheManager: _cacheManager,
-                                                placeholder: (context, url) =>
-                                                    Container(
-                                                  color: Colors.grey[200],
-                                                  child: const Center(
-                                                    child:
-                                                        CircularProgressIndicator(),
-                                                  ),
-                                                ),
-                                                errorWidget:
-                                                    (context, url, error) =>
-                                                        const Icon(Icons.error),
-                                              )
-                                            : Image.file(
-                                                item as File,
-                                                fit: BoxFit.cover,
-                                              ),
-                                      ),
-                                      if (widget.isEdit)
-                                        Positioned(
-                                          top: 5,
-                                          right: 5,
-                                          child: CircleAvatar(
-                                            radius: 15,
-                                            backgroundColor:
-                                                Colors.red.withOpacity(0.8),
+                                        if (widget.isEdit)
+                                          Positioned(
+                                            top: 10,
+                                            right: 10,
                                             child: IconButton(
-                                              icon: const Icon(Icons.close,
-                                                  size: 15,
-                                                  color: Colors.white),
+                                              icon: Icon(Icons.delete,
+                                                  color: Colors.red),
                                               onPressed: () =>
                                                   _deleteImage(index),
                                             ),
                                           ),
-                                        ),
-                                      if (isUrl)
-                                        Positioned(
-                                          bottom: 5,
-                                          left: 5,
-                                          child: Container(
-                                            padding: const EdgeInsets.symmetric(
-                                                horizontal: 4, vertical: 2),
-                                            decoration: BoxDecoration(
-                                              color: Colors.black54,
-                                              borderRadius:
-                                                  BorderRadius.circular(4),
-                                            ),
-                                            child: const Text(
-                                              'Server',
-                                              style: TextStyle(
-                                                color: Colors.white,
-                                                fontSize: 10,
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    sizeSnapshot.hasData
-                                        ? _formatFileSize(sizeSnapshot.data!)
-                                        : '...',
-                                    style: const TextStyle(fontSize: 12),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          );
-                        },
-                      );
-                    },
-                  ),
+                                      ],
+                                    );
+                                  },
+                                ));
+                          },
+                        );
+                      },
+                    )),
+
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: displayItems.asMap().entries.map((entry) {
+              return Container(
+                width: 8.0,
+                height: 8.0,
+                margin: EdgeInsets.symmetric(vertical: 10.0, horizontal: 2.0),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: _currentIndex == entry.key
+                      ? Colors.blue
+                      : Colors.grey.withOpacity(0.4),
+                ),
+              );
+            }).toList(),
           ),
-        
-          if (widget.isEdit)
-          // Controls
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  ElevatedButton.icon(
-                    icon: const Icon(Icons.add_photo_alternate),
-                    label: const Text('Add Images'),
-                    onPressed: _isCompressing ? null : _pickImages,
-                  ),
-                  if (_pickedImages.isNotEmpty && !_isCompressing)
-                    ElevatedButton.icon(
-                      icon: const Icon(Icons.compress),
-                      label: const Text('Compress New'),
-                      onPressed: _compressNewImages,
-                    ),
-                ],
-              ),
-            ),
-        
           if (_isCompressing)
             const Padding(
               padding: EdgeInsets.only(bottom: 8.0),
               child: LinearProgressIndicator(),
             ),
-        
         ],
       ),
     );

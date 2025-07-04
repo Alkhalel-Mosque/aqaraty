@@ -1,8 +1,12 @@
 import 'package:aqaraty/components/image_pick.dart';
+import 'package:aqaraty/components/map_view.dart';
 import 'package:aqaraty/components/my_map.dart';
 import 'package:aqaraty/components/my_snackbar.dart';
 import 'package:aqaraty/provider/notifiers.dart';
+import 'package:aqaraty/router/router.dart';
+import 'package:aqaraty/widgets/my_autocomplete.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../../enums/enums.dart';
 import '../../extensions/extension.dart';
 import '../../models/real_estate.dart';
@@ -34,7 +38,7 @@ class _AddPageState extends ConsumerState<AddPage> {
     direction: [],
     features: [],
   );
-  
+
   RealEstate draft = RealEstate(
     direction: [],
     features: [],
@@ -129,7 +133,6 @@ class _AddPageState extends ConsumerState<AddPage> {
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
-      
       onWillPop: () async {
         final res =
             (widget.realEstate != null && widget.realEstate != realEstate) ||
@@ -140,9 +143,7 @@ class _AddPageState extends ConsumerState<AddPage> {
         }
         return true;
       },
-
       child: Scaffold(
-
         appBar: AppBar(
           title: const Text("إضافة عقار"),
           actions: [
@@ -154,14 +155,12 @@ class _AddPageState extends ConsumerState<AddPage> {
                   },
                   icon: const Icon(Icons.edit)),
             if (widget.realEstate != null)
-              IconButton(onPressed: _deleteRealEstate, icon: const Icon(Icons.delete))
+              IconButton(
+                  onPressed: _deleteRealEstate, icon: const Icon(Icons.delete))
           ],
         ),
-        
         body: Padding(
-        
           padding: const EdgeInsets.all(8.0),
-        
           child: ListView(
             children: [
               10.getHightSizedBox,
@@ -173,6 +172,7 @@ class _AddPageState extends ConsumerState<AddPage> {
                   initVal: widget.realEstate?.createdBy?.username,
                 ),
               10.getHightSizedBox,
+
               MyComboBox(
                 text: realEstate.requestStatus?.arName,
                 hint: "الحالة",
@@ -206,25 +206,45 @@ class _AddPageState extends ConsumerState<AddPage> {
                 items: PropertyType.values.map((e) => e.arName).toList(),
               ),
               10.getHightSizedBox,
-              MyTextFormField(
+              MyAutoComplete(
                 labelText: "الموقع",
                 enabled: editable,
-                initVal: realEstate.locationArea,
                 onChanged: (p0) => realEstate.locationArea = p0,
+                initVal: realEstate.locationArea,
+                suffixIcon: realEstate.coords == null
+                    ? IconButton(
+                        onPressed: () {
+                          context.myPush(MapView(
+                            coords: realEstate.coords,
+                            onSave: (p1) {
+                              realEstate.coords = p1;
+                              setState(() {});
+                            },
+                          ));
+                        },
+                        icon: FaIcon(FontAwesomeIcons.mapLocationDot),
+                      )
+                    : Icon(Icons.location_on_outlined),
+                onSelected: (p0) {
+                  realEstate.locationArea = p0;
+                },
+                data: locations,
               ),
-              10.getHightSizedBox,
-              ClipRRect(
-                borderRadius: BorderRadius.circular(15),
-                child: SizedBox(
-                    height: 200,
-                    child: MyMap(
-                      coords: realEstate.coords,
-                      onSave: (p0) {
-                        print(p0);
-                        realEstate.coords = p0;
-                      },
-                    )),
-              ),
+              if (realEstate.coords != null) 10.getHightSizedBox,
+              if (realEstate.coords != null)
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(15),
+                  child: SizedBox(
+                      height: 200,
+                      child: MyMap(
+                        coords: realEstate.coords,
+                        onSave: (p0) {
+                          realEstate.coords = p0;
+
+                          setState(() {});
+                        },
+                      )),
+                ),
               10.getHightSizedBox,
               MyTextFormField(
                 labelText: "علامة",
@@ -273,7 +293,19 @@ class _AddPageState extends ConsumerState<AddPage> {
                     child: MyCheckBox(
                       editable: editable,
                       val: realEstate.iswithSalon,
-                      text: "مع صالون",
+                      text: "صالون",
+                      onChanged: (p0) {
+                        realEstate.iswithSalon = p0!;
+                        setState(() {});
+                      },
+                    ),
+                  ),
+                  5.getWidthSizedBox,
+                  Expanded(
+                    child: MyCheckBox(
+                      editable: editable,
+                      val: realEstate.iswithSalon,
+                      text: "سطح",
                       onChanged: (p0) {
                         realEstate.iswithSalon = p0!;
                         setState(() {});
@@ -285,7 +317,7 @@ class _AddPageState extends ConsumerState<AddPage> {
                     child: MyCheckBox(
                       editable: editable,
                       val: realEstate.iswithSofa,
-                      text: "مع صوفا",
+                      text: "صوفا",
                       onChanged: (p0) {
                         realEstate.iswithSofa = p0!;
                         setState(() {});
@@ -479,18 +511,21 @@ class _AddPageState extends ConsumerState<AddPage> {
                 ),
               // ImageView(images: realEstate.gallary ?? []),
               10.getHightSizedBox,
-              EnhancedImageCompressor(
-                isEdit: editable,
-                initialImageUrls: realEstate.gallary ?? [],
-                onFilePicked: (files) {
-                  realEstate.gallary = files
-                      .map(
-                        (e) => e.path,
-                      )
-                      .toList();
-                },
-              ),
+              if (!(!editable && (realEstate.gallary?.isEmpty ?? true)))
+                EnhancedImageCompressor(
+                  isEdit: editable,
+                  initialImageUrls: realEstate.gallary ?? [],
+                  onFilePicked: (files) {
+                    realEstate.gallary = files
+                        .map(
+                          (e) => e.path,
+                        )
+                        .toList();
+                  },
+                ),
+
               if (realEstate.isOffice) 10.getHightSizedBox,
+              20.getHightSizedBox,
               if (editable)
                 CustomTextButton(
                   onPressed: _addRealestate,
@@ -501,7 +536,6 @@ class _AddPageState extends ConsumerState<AddPage> {
               50.getHightSizedBox,
             ],
           ),
-        
         ),
       ),
     );
