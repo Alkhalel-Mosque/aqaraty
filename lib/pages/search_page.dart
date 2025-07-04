@@ -48,7 +48,6 @@ class _SearchScreenState<T extends RealEstate>
   }
 
   @override
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
       drawer: FilterDrawer(
@@ -95,6 +94,12 @@ class _SearchScreenState<T extends RealEstate>
                       },
                       icon: const Icon(Icons.close),
                     ),
+                  Builder(
+                      builder: (contextt) => IconButton(
+                          onPressed: () {
+                            Scaffold.of(contextt).openDrawer();
+                          },
+                          icon: Icon(Icons.add_ic_call_rounded)))
                 ],
               ),
             ),
