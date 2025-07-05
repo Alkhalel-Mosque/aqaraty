@@ -6,14 +6,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class SearchScreen<T extends RealEstate> extends ConsumerStatefulWidget {
-  const SearchScreen({
-    super.key,
-    this.onSearch,
-    required this.hint,
-    this.resultBuilder,
-    required this.allEstates,
-  });
-
+  const SearchScreen(
+      {super.key,
+      this.onSearch,
+      required this.hint,
+      this.resultBuilder,
+      required this.allEstates,
+      this.openDrawer = false});
+  final bool openDrawer;
   final String hint;
   final List<T> Function(dynamic)? onSearch;
   final Widget Function(BuildContext, int, T)? resultBuilder;
@@ -29,6 +29,8 @@ class _SearchScreenState<T extends RealEstate>
 
   List<T> filteredList = [];
   List<T> result = [];
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  bool isAscending = true;
 
   void updateResult() {
     final searchQuery = _controller.text.toLowerCase();
@@ -36,6 +38,12 @@ class _SearchScreenState<T extends RealEstate>
     setState(() {
       if (searchQuery.isEmpty) {
         result = filteredList;
+      } else {
+        result = filteredList.where((realEstate) {
+          final office = realEstate.officeName?.toLowerCase() ?? '';
+          final customer = realEstate.customerName?.toLowerCase() ?? '';
+          return office.contains(searchQuery) || customer.contains(searchQuery);
+        }).toList();
       }
     });
   }
@@ -43,6 +51,11 @@ class _SearchScreenState<T extends RealEstate>
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (widget.openDrawer) {
+        _scaffoldKey.currentState?.openDrawer();
+      }
+    });
     filteredList = widget.allEstates;
     result = widget.allEstates;
   }
@@ -50,6 +63,12 @@ class _SearchScreenState<T extends RealEstate>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      floatingActionButton: FloatingActionButton(onPressed: () {
+        setState(() {
+          isAscending = !isAscending;
+        });
+      }),
+      key: _scaffoldKey,
       drawer: FilterDrawer(
         allEstates: widget.allEstates.cast<RealEstate>(),
         onFilterChanged: (filteredEstates) {
@@ -99,7 +118,7 @@ class _SearchScreenState<T extends RealEstate>
                           onPressed: () {
                             Scaffold.of(contextt).openDrawer();
                           },
-                          icon: Icon(Icons.add_ic_call_rounded)))
+                          icon: Icon(Icons.filter_alt_outlined)))
                 ],
               ),
             ),

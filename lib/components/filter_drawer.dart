@@ -30,6 +30,7 @@ class FilterDrawerState extends ConsumerState<FilterDrawer> {
   @override
   void initState() {
     super.initState();
+
     final filterState = ref.read(filterProvider);
     minPriceController =
         TextEditingController(text: filterState.minPrice?.toString() ?? '');
