@@ -65,12 +65,6 @@ class _MapViewState extends State<MapView> {
     return pos;
   }
 
-  void _deleteMarker() {
-    setState(() {
-      markerPosition = null;
-    });
-  }
-
   void _confirmLocation() {
     if (markerPosition != null) {
       widget.onSave.call(markerPosition);

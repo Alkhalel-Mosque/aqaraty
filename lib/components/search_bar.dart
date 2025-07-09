@@ -61,7 +61,19 @@ class CustomSearchBar extends StatelessWidget {
                 style: Theme.of(context).textTheme.titleLarge,
               ),
             ),
-            const IconButton(onPressed: null, icon: Icon(Icons.search)),
+            IconButton(
+                onPressed: () {
+                  context.myPush(
+                    SearchScreen<RealEstate>(
+                      allEstates: allEstates,
+                      onSearch: onSearch,
+                      hint: hint,
+                      resultBuilder: resultBuilder,
+                      openDrawer: true,
+                    ),
+                  );
+                },
+                icon: Icon(Icons.search)),
           ],
         ),
       ),
