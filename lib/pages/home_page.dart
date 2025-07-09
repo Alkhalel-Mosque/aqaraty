@@ -28,16 +28,17 @@ class _HomePageState extends ConsumerState<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    final coreProvRead = ref.read(coreProvider);
-    final data = ref.watch(coreProvider).realEstates;
+    final data = [...ref.watch(coreProvider).realEstates]..sort((a, b) =>
+        (b.createdAt ?? DateTime(0)).compareTo(a.createdAt ?? DateTime(0)));
+    final dataForSearch = ref.watch(coreProvider).realEstates;
     return Scaffold(
       floatingActionButton: FloatingActionButton(
         child: const Icon(Icons.add),
         onPressed: () {
-          context.myPush(AddPage());
+          context.myPush(const AddPage());
         },
       ),
-      drawer: MyDrawer(),
+      drawer: const MyDrawer(),
       body: SafeArea(
         child: Column(
           children: [
@@ -49,7 +50,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                 },
                 hint: "",
                 title: "عقاراتي",
-                allEstates: data,
+                allEstates: dataForSearch,
               ),
             ),
             Expanded(

@@ -1,4 +1,5 @@
 import 'package:aqaraty/components/filter_drawer.dart';
+import 'package:aqaraty/components/sort_dialog.dart';
 
 import 'package:aqaraty/models/real_estate.dart';
 
@@ -9,12 +10,11 @@ class SearchScreen<T extends RealEstate> extends ConsumerStatefulWidget {
   const SearchScreen(
       {super.key,
       this.onSearch,
-      required this.hint,
       this.resultBuilder,
       required this.allEstates,
       this.openDrawer = false});
   final bool openDrawer;
-  final String hint;
+
   final List<T> Function(dynamic)? onSearch;
   final Widget Function(BuildContext, int, T)? resultBuilder;
   final List<T> allEstates;
@@ -63,11 +63,6 @@ class _SearchScreenState<T extends RealEstate>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      floatingActionButton: FloatingActionButton(onPressed: () {
-        setState(() {
-          isAscending = !isAscending;
-        });
-      }),
       key: _scaffoldKey,
       drawer: FilterDrawer(
         allEstates: widget.allEstates.cast<RealEstate>(),
@@ -99,8 +94,8 @@ class _SearchScreenState<T extends RealEstate>
                           updateResult();
                         });
                       },
-                      decoration: InputDecoration(
-                        hintText: widget.hint,
+                      decoration: const InputDecoration(
+                        hintText: "بحث",
                         border: InputBorder.none,
                       ),
                     ),
@@ -118,26 +113,51 @@ class _SearchScreenState<T extends RealEstate>
                           onPressed: () {
                             Scaffold.of(contextt).openDrawer();
                           },
-                          icon: Icon(Icons.filter_alt_outlined)))
+                          icon: const Icon(Icons.filter_alt_outlined))),
+                  IconButton(
+                    icon: const Icon(Icons.sort),
+                    onPressed: () async {
+                      final sortResult = await showSortDialog(context);
+
+                      if (sortResult != null) {
+                        setState(() {
+                          result.sort((a, b) {
+                            dynamic valA, valB;
+                            switch (sortResult.sortBy) {
+                              case 'price':
+                                valA = a.price;
+                                valB = b.price;
+                                break;
+                              case 'rooms':
+                                valA = a.rooms;
+                                valB = b.rooms;
+                                break;
+                              case 'area':
+                                valA = a.area ?? 0;
+                                valB = b.area ?? 0;
+                                break;
+                              case 'createdAt':
+                              default:
+                                valA = a.createdAt ?? DateTime(1900);
+                                valB = b.createdAt ?? DateTime(1900);
+                                break;
+                            }
+
+                            if (valA is Comparable && valB is Comparable) {
+                              return sortResult.ascending
+                                  ? valA.compareTo(valB)
+                                  : valB.compareTo(valA);
+                            }
+                            return 0;
+                          });
+                        });
+                      }
+                    },
+                  ),
                 ],
               ),
             ),
           ),
-          // SizedBox(
-          //   height: 50,
-          //   child: Padding(
-          //     padding: const EdgeInsets.only(top: 10),
-          //     child: MyListFilter(
-          //       allEstates: widget.allEstates.cast<RealEstate>(),
-          //       onFilterChanged: (filtered) {
-          //         setState(() {
-          //           filteredList = filtered.cast<T>();
-          //         });
-          //         updateResult();
-          //       },
-          //     ),
-          //   ),
-          // ),
           if (result.isNotEmpty)
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 8.0),

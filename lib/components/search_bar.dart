@@ -40,7 +40,6 @@ class CustomSearchBar extends StatelessWidget {
             SearchScreen<RealEstate>(
               allEstates: allEstates,
               onSearch: onSearch,
-              hint: hint,
               resultBuilder: resultBuilder,
             ),
           );
@@ -67,7 +66,6 @@ class CustomSearchBar extends StatelessWidget {
                     SearchScreen<RealEstate>(
                       allEstates: allEstates,
                       onSearch: onSearch,
-                      hint: hint,
                       resultBuilder: resultBuilder,
                       openDrawer: true,
                     ),

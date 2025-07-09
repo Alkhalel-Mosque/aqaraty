@@ -6,6 +6,7 @@ import 'package:aqaraty/router/router.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
+import 'package:intl/intl.dart';
 
 class RealestateCard extends StatelessWidget {
   const RealestateCard({super.key, required this.realEstate});
@@ -87,6 +88,12 @@ class RealestateCard extends StatelessWidget {
                         PieceOfInfo(
                           text: realEstate.locationArea!,
                           iconData: Icons.location_on_outlined,
+                        ),
+                        Text(
+                          realEstate.createdAt != null
+                              ? 'تمت الإضافة في: ${DateFormat('yyyy/MM/dd – HH:mm').format(realEstate.createdAt!)}'
+                              : 'تاريخ غير متوفر',
+                          style: TextStyle(fontSize: 10, color: Colors.grey),
                         ),
                       ],
                     ),
