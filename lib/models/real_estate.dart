@@ -32,6 +32,7 @@ class RealEstate extends Equatable {
   User? createdBy;
   RequestStatus? requestStatus;
   LatLng? coords;
+  DateTime? createdAt;
 
   RealEstate({
     this.id,
@@ -60,6 +61,7 @@ class RealEstate extends Equatable {
     this.additionalInformation,
     this.gallary,
     this.createdBy,
+    this.createdAt,
     this.requestStatus = RequestStatus.pending,
   });
 
@@ -185,6 +187,7 @@ class RealEstate extends Equatable {
           .map((e) => e as String)
           .toList(),
       createdBy: User.userFromParseUser(parseObject.get('user')!),
+      createdAt: parseObject.createdAt,
       requestStatus: enumFromString(
               RequestStatus.values, parseObject.get<String>('requestStatus')) ??
           RequestStatus.pending,
