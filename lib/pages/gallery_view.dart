@@ -22,37 +22,64 @@ class GalleryView extends StatefulWidget {
 }
 
 class _GalleryViewState extends State<GalleryView> {
+  bool _isValidImageUrl(String url) {
+    try {
+      final uri = Uri.parse(url);
+      return uri.isAbsolute && (uri.scheme == 'http' || uri.scheme == 'https');
+    } catch (_) {
+      return false;
+    }
+  }
+
+  @override
+  void dispose() {
+    widget.pageController?.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+      ),
+      extendBodyBehindAppBar: true,
       body: PhotoViewGallery.builder(
         scrollPhysics: const BouncingScrollPhysics(),
         builder: (BuildContext context, int index) {
-          print(widget.galleryItems[index].imageUrl);
-
+          final item = widget.galleryItems[index];
           return PhotoViewGalleryPageOptions(
-            imageProvider: CachedNetworkImageProvider(
-              widget.galleryItems[index].imageUrl, // Assuming this is now a URL
+            imageProvider: _isValidImageUrl(item.imageUrl)
+                ? CachedNetworkImageProvider(item.imageUrl)
+                : AssetImage('assets/placeholder.png') as ImageProvider,
+            errorBuilder: (context, error, stackTrace) => Center(
+              child: Icon(Icons.broken_image, color: Colors.grey),
             ),
             initialScale: PhotoViewComputedScale.contained * 0.8,
-            heroAttributes: PhotoViewHeroAttributes(
-              tag: widget.galleryItems[index].id,
-            ),
+            heroAttributes: PhotoViewHeroAttributes(tag: item.id),
+            minScale: PhotoViewComputedScale.contained * 0.5,
+            maxScale: PhotoViewComputedScale.covered * 2.0,
           );
         },
         itemCount: widget.galleryItems.length,
         loadingBuilder: (context, event) => Center(
-          child: Container(
-            width: 20.0,
-            height: 20.0,
+          child: SizedBox(
+            width: 50,
+            height: 50,
             child: CircularProgressIndicator(
-              value: event == null
-                  ? 0
-                  : event.cumulativeBytesLoaded / event.expectedTotalBytes!,
+              value: event?.cumulativeBytesLoaded.toDouble() ?? 0,
+              valueColor: AlwaysStoppedAnimation(Colors.blue),
+              strokeWidth: 3,
             ),
           ),
         ),
-        backgroundDecoration: widget.backgroundDecoration,
+        backgroundDecoration:
+            widget.backgroundDecoration ?? BoxDecoration(color: Colors.black),
         pageController: widget.pageController,
         onPageChanged: widget.onPageChanged,
       ),
@@ -62,7 +89,7 @@ class _GalleryViewState extends State<GalleryView> {
 
 class GalleryItem {
   final String id;
-  final String imageUrl; // Changed from image to imageUrl for clarity
+  final String imageUrl;
 
   GalleryItem({required this.id, required this.imageUrl});
 }

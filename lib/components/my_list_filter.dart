@@ -2,6 +2,11 @@ import 'package:aqaraty/components/boolen_filter.dart';
 import 'package:aqaraty/components/filter_button.dart';
 import 'package:aqaraty/components/int_filter_button.dart';
 import 'package:aqaraty/enums/enums.dart';
+import 'package:aqaraty/local_data/condition.dart';
+import 'package:aqaraty/local_data/direction.dart';
+import 'package:aqaraty/local_data/furnishing_1.dart';
+import 'package:aqaraty/local_data/property_type.dart';
+import 'package:aqaraty/local_data/types_local.dart';
 import 'package:aqaraty/models/real_estate.dart';
 import 'package:flutter/material.dart';
 

@@ -2,7 +2,9 @@ import 'package:aqaraty/api/api.dart';
 import 'package:aqaraty/models/real_estate.dart';
 import 'package:aqaraty/models/user.dart';
 import 'package:aqaraty/utils/toast.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
 import 'package:parse_server_sdk_flutter/parse_server_sdk_flutter.dart';
 
 class CoreProvider extends ChangeNotifier {
@@ -26,6 +28,9 @@ class CoreProvider extends ChangeNotifier {
     // try {
     final res = await api.fetchAllItems();
     realEstates = res;
+    print("fetchAllItems===================================");
+
+    print("items from API: $res");
     notifyListeners();
     // } catch (e) {
     //   print(e);
@@ -90,5 +95,31 @@ class CoreProvider extends ChangeNotifier {
     } catch (e) {
       print('Logout error: $e');
     }
+  }
+
+  void listenToConnectivityAndSync() {
+    Connectivity()
+        .onConnectivityChanged
+        .listen((ConnectivityResult result) async {
+      if (result != ConnectivityResult.none) {
+        final box = Hive.box<RealEstate>('pending_real_estates');
+
+        final toUpload = box.values.toList();
+        for (var realEstate in toUpload) {
+          try {
+            bool res = await addRealEstate(realEstate);
+            if (res) {
+              final key = box.keyAt(box.values.toList().indexOf(realEstate));
+              await box.delete(key);
+
+              CustomToast.showToast(
+                  "✅ تم رفع العقار المحفوظ: ${realEstate.customerName}");
+            }
+          } catch (e) {
+            CustomToast.showToast("❌ فشل في الرفع: $e");
+          }
+        }
+      }
+    });
   }
 }

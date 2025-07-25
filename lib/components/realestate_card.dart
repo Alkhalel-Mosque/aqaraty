@@ -1,5 +1,6 @@
 import 'package:aqaraty/components/custom_image.dart';
 import 'package:aqaraty/enums/enums.dart';
+import 'package:aqaraty/local_data/request_status.dart';
 import 'package:aqaraty/models/real_estate.dart';
 import 'package:aqaraty/pages/add_page.dart';
 import 'package:aqaraty/router/router.dart';
@@ -31,6 +32,7 @@ class RealestateCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    print(realEstate.gallary);
     return Banner(
       message: realEstate.type!.arName,
       color: theme.colorScheme.primaryContainer,

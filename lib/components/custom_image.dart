@@ -10,9 +10,13 @@ class CustomImage extends StatelessWidget {
     return ClipRRect(
       borderRadius: BorderRadius.circular(10),
       child: path == null
-          ? Image.asset("assets/images/logo.png",fit: BoxFit.cover,height: 200,)
+          ? Image.asset(
+              "assets/images/logo.png",
+              fit: BoxFit.cover,
+              height: 200,
+            )
           : CachedNetworkImage(
-              imageUrl: path! ,
+              imageUrl: path!,
               height: 250,
               fit: BoxFit.cover,
               placeholder: (context, url) => Container(

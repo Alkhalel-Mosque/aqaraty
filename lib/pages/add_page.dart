@@ -2,11 +2,22 @@ import 'package:aqaraty/components/image_pick.dart';
 import 'package:aqaraty/components/map_view.dart';
 import 'package:aqaraty/components/my_map.dart';
 import 'package:aqaraty/components/my_snackbar.dart';
+import 'package:aqaraty/local_data/condition.dart';
+import 'package:aqaraty/local_data/direction.dart';
+import 'package:aqaraty/local_data/features.dart';
+import 'package:aqaraty/local_data/furnishing_1.dart';
+import 'package:aqaraty/local_data/ownershipType.dart';
+import 'package:aqaraty/local_data/property_type.dart';
+import 'package:aqaraty/local_data/request_status.dart';
+import 'package:aqaraty/local_data/types_local.dart';
+import 'package:aqaraty/models/user.dart';
 import 'package:aqaraty/provider/notifiers.dart';
 import 'package:aqaraty/router/router.dart';
 import 'package:aqaraty/widgets/my_autocomplete.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:hive/hive.dart';
 import '../../enums/enums.dart';
 import '../../extensions/extension.dart';
 import '../../models/real_estate.dart';
@@ -31,6 +42,7 @@ class AddPage extends ConsumerStatefulWidget {
 }
 
 class _AddPageState extends ConsumerState<AddPage> {
+  User? createdByUser;
   bool editable = true;
 
   // Position? _currentPosition;
@@ -46,6 +58,15 @@ class _AddPageState extends ConsumerState<AddPage> {
 
   @override
   void initState() {
+    if (widget.realEstate?.createdById != null) {
+      fetchUserById(widget.realEstate?.createdById).then((user) {
+        if (mounted) {
+          setState(() {
+            createdByUser = user as User?;
+          });
+        }
+      });
+    }
     if (widget.realEstate != null) {
       realEstate = widget.realEstate!.copyWith();
       editable = false;
@@ -106,6 +127,18 @@ class _AddPageState extends ConsumerState<AddPage> {
       CustomToast.showToast("يرجى إضافة رقم الزبون");
       return;
     }
+    final connectivity = await Connectivity().checkConnectivity();
+    final hasConnection = connectivity != ConnectivityResult.none;
+
+    if (!hasConnection) {
+      final box = Hive.box<RealEstate>('pending_real_estates');
+
+      await box.add(realEstate);
+
+      CustomToast.showToast("🚫 لا يوجد اتصال، تم الحفظ محليًا");
+      Navigator.pop(context);
+      return;
+    }
     bool res;
     if (widget.realEstate == null) {
       res = await ref.read(coreProvider).addRealEstate(realEstate);
@@ -164,13 +197,12 @@ class _AddPageState extends ConsumerState<AddPage> {
           child: ListView(
             children: [
               10.getHightSizedBox,
-              if (widget.realEstate?.createdBy != null)
+              if (widget.realEstate?.createdById != null)
                 MyTextFormField(
-                  labelText: "منشئ الطلب",
-                  enabled: false,
-                  suffixIcon: const Icon(Icons.account_circle_outlined),
-                  initVal: widget.realEstate?.createdBy?.username,
-                ),
+                    labelText: "منشئ الطلب",
+                    enabled: false,
+                    suffixIcon: Icon(Icons.account_circle_outlined),
+                    initVal: createdByUser?.username),
               10.getHightSizedBox,
 
               MyComboBox(

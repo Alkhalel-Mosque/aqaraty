@@ -7,7 +7,7 @@ import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:open_file/open_file.dart';
+
 import 'dart:io';
 
 class EnhancedImageCompressor extends StatefulWidget {
@@ -121,6 +121,12 @@ class _EnhancedImageCompressorState extends State<EnhancedImageCompressor> {
     for (var e in _initialImageUrls) {
       initFiles.add(await _cacheManager.getSingleFile(e));
     }
+    //////////////////////////////////////////////////////
+    final allFiles = [...initFiles, ..._compressedImages];
+    print("📦 الصور المرسلة إلى parent: ${allFiles.length}");
+    for (var file in allFiles) {
+      print("📸 ${file.path} | ${file.lengthSync()} bytes");
+    }
     widget.onFilePicked([...initFiles, ..._compressedImages]);
   }
 
@@ -214,11 +220,11 @@ class _EnhancedImageCompressorState extends State<EnhancedImageCompressor> {
                   'عدد الصور: (${displayItems.length})',
                   style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
-                if(widget.isEdit&&displayItems.isNotEmpty)
-                IconButton(
-                  onPressed:_pickImages,
-                  icon: Icon(Icons.add_a_photo_outlined),
-                )
+                if (widget.isEdit && displayItems.isNotEmpty)
+                  IconButton(
+                    onPressed: _pickImages,
+                    icon: Icon(Icons.add_a_photo_outlined),
+                  )
               ],
             ),
           ),

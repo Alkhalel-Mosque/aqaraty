@@ -1,44 +1,84 @@
+import 'package:aqaraty/local_data/condition.dart';
+import 'package:aqaraty/local_data/direction.dart';
+import 'package:aqaraty/local_data/features.dart';
+import 'package:aqaraty/local_data/furnishing_1.dart';
+import 'package:aqaraty/local_data/ownershipType.dart';
+import 'package:aqaraty/local_data/property_type.dart';
+import 'package:aqaraty/local_data/request_status.dart';
+import 'package:aqaraty/local_data/types_local.dart';
 import 'package:aqaraty/models/user.dart';
 import 'package:equatable/equatable.dart';
+import 'package:hive/hive.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:parse_server_sdk_flutter/parse_server_sdk_flutter.dart';
 import '../enums/enums.dart';
 
-class RealEstate extends Equatable {
+part 'real_estate.g.dart';
+
+@HiveType(typeId: 0)
+class RealEstate extends HiveObject with EquatableMixin {
+  @HiveField(0)
   String? id;
+  @HiveField(1)
   Types? type;
+  @HiveField(2)
   PropertyType? propertyType;
+  @HiveField(3)
   String? locationArea;
+  @HiveField(4)
   String? locationMark;
+  @HiveField(5)
   int price;
+  @HiveField(6)
   int? floor;
+  @HiveField(7)
   int rooms;
+  @HiveField(8)
   bool iswithSalon;
+  @HiveField(9)
   bool iswithRoof;
+  @HiveField(10)
   bool iswithSofa;
+  @HiveField(11)
   int? area;
+  @HiveField(12)
   List<Direction>? direction;
+  @HiveField(13)
   OwnershipType? ownershipType;
+  @HiveField(14)
   Condition? condition;
+  @HiveField(15)
   String? customerName;
+  @HiveField(16)
   String? customerPhone;
+  @HiveField(17)
   String? officeName;
+  @HiveField(18)
   String? officePhone;
+  @HiveField(19)
   Furnishing? furnishing;
+  @HiveField(20)
   bool isOffice;
+  @HiveField(21)
   List<Features>? features;
+  @HiveField(22)
   String? additionalInformation;
+  @HiveField(23)
   List<String>? gallary;
-  User? createdBy;
+  @HiveField(24)
+  String? createdById;
+  @HiveField(25)
   RequestStatus? requestStatus;
+  @HiveField(26)
   LatLng? coords;
+  @HiveField(27)
   DateTime? createdAt;
 
   RealEstate({
     this.id,
     this.type,
     this.propertyType,
-    this.locationArea ,
+    this.locationArea,
     this.locationMark,
     this.condition,
     this.price = 0,
@@ -60,40 +100,29 @@ class RealEstate extends Equatable {
     this.features,
     this.additionalInformation,
     this.gallary,
-    this.createdBy,
+    this.createdById,
     this.createdAt,
     this.requestStatus = RequestStatus.pending,
   });
 
   Future<ParseObject> realEstateToParseObject(RealEstate realEstate) async {
-    // Create the base ParseObject
     final parseObject = ParseObject('real_estate');
 
-    // Convert enum values to strings
-    final typeString = realEstate.type?.toString().split('.').last;
-    final propertyTypeString =
-        realEstate.propertyType?.toString().split('.').last;
-    final ownershipTypeString =
-        realEstate.ownershipType?.toString().split('.').last;
-    final conditionString = realEstate.condition?.toString().split('.').last;
-    final furnishingString = realEstate.furnishing?.toString().split('.').last;
-    final requestStatusString =
-        RequestStatus.pending.toString().split('.').last;
+    final validGallery = realEstate.gallary?.where((url) {
+      try {
+        final uri = Uri.parse(url);
+        return uri.isAbsolute &&
+            (uri.scheme == 'http' || uri.scheme == 'https');
+      } catch (_) {
+        return false;
+      }
+    }).toList();
 
-    // Convert directions to ParseArray
-    final directionsArray = realEstate.direction
-        ?.map((dir) => dir.toString().split('.').last)
-        .toList();
-
-    // Convert features to ParseArray
-    final featuresArray = realEstate.features
-        ?.map((feature) => feature.toString().split('.').last)
-        .toList();
-
-    // Set all properties
-    parseObject.set<String?>('type', typeString);
-    parseObject.set<String?>('objectId', id);
-    parseObject.set<String?>('propertyType', propertyTypeString);
+    parseObject.set<String?>(
+        'type', realEstate.type?.toString().split('.').last);
+    parseObject.set<String?>('objectId', realEstate.id);
+    parseObject.set<String?>(
+        'propertyType', realEstate.propertyType?.toString().split('.').last);
     parseObject.set<String?>('locationArea', realEstate.locationArea);
     parseObject.set<String?>('locationMark', realEstate.locationMark);
     parseObject.set<int?>('price', realEstate.price);
@@ -103,39 +132,58 @@ class RealEstate extends Equatable {
     parseObject.set<bool?>('iswithSofa', realEstate.iswithSofa);
     parseObject.set<bool?>('iswithRoof', realEstate.iswithRoof);
     parseObject.set<int?>('area', realEstate.area);
-    parseObject.set<List?>('direction', directionsArray);
-    parseObject.set<String?>('ownershipType', ownershipTypeString);
-    parseObject.set<String?>('condition', conditionString);
+    parseObject.set<List?>(
+        'direction',
+        realEstate.direction
+            ?.map((dir) => dir.toString().split('.').last)
+            .toList());
+    parseObject.set<String?>(
+        'ownershipType', realEstate.ownershipType?.toString().split('.').last);
+    parseObject.set<String?>(
+        'condition', realEstate.condition?.toString().split('.').last);
     parseObject.set<String?>('customerName', realEstate.customerName);
     parseObject.set<String?>('customerPhone', realEstate.customerPhone);
     parseObject.set<String?>('officeName', realEstate.officeName);
     parseObject.set<String?>('officePhone', realEstate.officePhone);
-    parseObject.set<String?>('furnishing', furnishingString);
+    parseObject.set<String?>(
+        'furnishing', realEstate.furnishing?.toString().split('.').last);
     parseObject.set<bool?>('isOffice', realEstate.isOffice);
-    parseObject.set<List?>('features', featuresArray);
+    parseObject.set<List?>(
+        'features',
+        realEstate.features
+            ?.map((feature) => feature.toString().split('.').last)
+            .toList());
+    parseObject.set<String?>(
+        'additional_information', realEstate.additionalInformation);
+    parseObject.set<List<String>?>('gallary', validGallery);
+    parseObject.set<String?>(
+        'requestStatus',
+        realEstate.requestStatus?.toString().split('.').last ??
+            RequestStatus.pending.toString().split('.').last);
 
-    if (coords != null) {
+    if (realEstate.coords != null) {
       parseObject.set<ParseGeoPoint?>(
         'mapLocation',
-        ParseGeoPoint(latitude: coords!.latitude, longitude: coords!.longitude),
+        ParseGeoPoint(
+            latitude: realEstate.coords!.latitude,
+            longitude: realEstate.coords!.longitude),
       );
     }
 
-    parseObject.set<String?>(
-        'additional_information', realEstate.additionalInformation);
-    parseObject.set<List<String>?>('gallary', realEstate.gallary);
-    parseObject.set<String?>('requestStatus', requestStatusString);
-
-    if (realEstate.createdBy == null) {
-      final ParseUser currentUser = await ParseUser.currentUser() as ParseUser;
-      parseObject.set('user', currentUser.toPointer());
+    if (realEstate.createdById == null) {
+      final currentUser = await ParseUser.currentUser() as ParseUser?;
+      if (currentUser != null) {
+        parseObject.set('user', currentUser.toPointer());
+      }
+    } else {
+      final user = ParseUser.forQuery()..objectId = realEstate.createdById;
+      parseObject.set('user', user.toPointer());
     }
 
     return parseObject;
   }
 
   factory RealEstate.realEstateFromParseObject(ParseObject parseObject) {
-    // Helper function to convert enum strings back to enum values
     T? enumFromString<T>(List<T> values, String? str) {
       if (str == null) return null;
       return values.firstWhere(
@@ -145,6 +193,10 @@ class RealEstate extends Equatable {
     }
 
     final geoPoint = parseObject.get<ParseGeoPoint?>('mapLocation');
+    final gallery = (parseObject.get<List<dynamic>>('gallary') ?? [])
+        .map((e) => e as String?)
+        .where((url) => url != null && Uri.tryParse(url)?.isAbsolute == true)
+        .toList();
 
     return RealEstate(
       id: parseObject.objectId,
@@ -183,10 +235,8 @@ class RealEstate extends Equatable {
           .whereType<Features>()
           .toList(),
       additionalInformation: parseObject.get<String>('additional_information'),
-      gallary: (parseObject.get<List<dynamic>>('gallary') ?? [])
-          .map((e) => e as String)
-          .toList(),
-      createdBy: User.userFromParseUser(parseObject.get('user')!),
+      gallary: gallery.cast<String>(),
+      createdById: parseObject.get<ParseUser>('user')?.objectId,
       createdAt: parseObject.createdAt,
       requestStatus: enumFromString(
               RequestStatus.values, parseObject.get<String>('requestStatus')) ??
@@ -212,12 +262,11 @@ class RealEstate extends Equatable {
     return room;
   }
 
-  static RegExp reg = RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))');
-
-  String mathFunc(Match match) => '${match[1]},';
+  static final RegExp _priceRegExp = RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))');
+  String _priceFormat(Match match) => '${match[1]},';
 
   String get getPrice =>
-      "${price.toString().replaceAllMapped(reg, mathFunc)} ل.س";
+      "${price.toString().replaceAllMapped(_priceRegExp, _priceFormat)} ل.س";
 
   String? get getFloor => ordinalsAr(floor);
 
@@ -246,28 +295,27 @@ class RealEstate extends Equatable {
     List<Features>? features,
     String? additionalInformation,
     List<String>? gallary,
-    User? createdBy,
+    String? createdById,
     RequestStatus? requestStatus,
     LatLng? coords,
+    DateTime? createdAt,
   }) {
     return RealEstate(
       id: id ?? this.id,
       type: type ?? this.type,
-      coords: coords ?? this.coords,
       propertyType: propertyType ?? this.propertyType,
       locationArea: locationArea ?? this.locationArea,
       locationMark: locationMark ?? this.locationMark,
       price: price ?? this.price,
       floor: floor ?? this.floor,
-      iswithRoof: iswithRoof ?? this.iswithRoof,
+      coords: coords ?? this.coords,
       rooms: rooms ?? this.rooms,
+      iswithRoof: iswithRoof ?? this.iswithRoof,
       iswithSalon: iswithSalon ?? this.iswithSalon,
       iswithSofa: iswithSofa ?? this.iswithSofa,
       area: area ?? this.area,
       direction: direction ??
-          (this.direction != null
-              ? List<Direction>.from(this.direction!)
-              : null),
+          (this.direction != null ? List.from(this.direction!) : null),
       ownershipType: ownershipType ?? this.ownershipType,
       condition: condition ?? this.condition,
       customerName: customerName ?? this.customerName,
@@ -277,13 +325,14 @@ class RealEstate extends Equatable {
       furnishing: furnishing ?? this.furnishing,
       isOffice: isOffice ?? this.isOffice,
       features: features ??
-          (this.features != null ? List<Features>.from(this.features!) : null),
+          (this.features != null ? List.from(this.features!) : null),
       additionalInformation:
           additionalInformation ?? this.additionalInformation,
-      gallary: gallary ??
-          (this.gallary != null ? List<String>.from(this.gallary!) : null),
-      createdBy: createdBy ?? this.createdBy,
+      gallary:
+          gallary ?? (this.gallary != null ? List.from(this.gallary!) : null),
+      createdById: createdById ?? this.createdById,
       requestStatus: requestStatus ?? this.requestStatus,
+      createdAt: createdAt ?? this.createdAt,
     );
   }
 
@@ -299,6 +348,7 @@ class RealEstate extends Equatable {
         rooms,
         iswithSalon,
         iswithSofa,
+        iswithRoof,
         area,
         direction,
         ownershipType,
@@ -312,68 +362,64 @@ class RealEstate extends Equatable {
         features,
         additionalInformation,
         gallary,
-        createdBy,
+        createdById,
         requestStatus,
+        coords,
+        createdAt,
       ];
 }
 
-// final realesatateSample = RealEstate(
-//   id: "0",
-//   type: Types.sell,
-//   propertyType: PropertyType.apartment,
-//   locationArea: "مساكن برزة",
-//   locationMark: "حلف الجامع",
-//   price: 20000000000,
-//   floor: 9,
-//   iswithSalon: true,
-//   rooms: 2,
-//   direction: [Direction.east, Direction.north],
-//   ownershipType: OwnershipType.housingTitle,
-//   customerName: "ابو علي",
-//   customerPhone: "0964866245",
-//   furnishing: Furnishing.full,
-//   createdBy: User(id: "g"),
-// );
+Future<ParseUser?> fetchUserById(String? id) async {
+  if (id == null) return null;
+
+  final query = QueryBuilder<ParseUser>(ParseUser.forQuery())
+    ..whereEqualTo('objectId', id);
+
+  final response = await query.query();
+
+  if (response.success &&
+      response.results != null &&
+      response.results!.isNotEmpty) {
+    return response.results!.first as ParseUser;
+  }
+  return null;
+}
 
 String? ordinalsAr(int? num, {bool isFeminine = false}) {
-  if (num == null) {
-    return null;
-  }
-  if (num == -2) {
-    return " قبو ثاني";
-  } else if (num == -1) {
-    return " قبو أول";
-  } else if (num == 0) {
-    return " الطابق الأرضي";
-  }
-  num %= 100; // only handle the lowest 2 digits (1-99), ignore others
-  String the =
-      " الطابق ال"; // set this to "" if you don't want the output prefixed with letters "ال"
-  int unit = num % 10;
-  String ordinal = the +
-      [
-        "",
-        "أول",
-        "ثاني",
-        "ثالث",
-        "رابع",
-        "خامس",
-        "سادس",
-        "سابع",
-        "ثامن",
-        "تاسع",
-        "عاشر"
-      ][num == 10 ? num : unit]; // letters for lower part of ordinal string
-  String female = isFeminine ? "ة" : ""; // add letter "ة" if Feminine
-  String ones = (unit == 1 ? "$theحادي" : ordinal) +
-      female; // special cases for 21, 31, 41, etc.
+  if (num == null) return null;
+
+  if (num == -2) return "قبو ثاني";
+  if (num == -1) return "قبو أول";
+  if (num == 0) return "الطابق الأرضي";
+
+  num %= 100;
+  const the = "الطابق ال";
+  final unit = num % 10;
+
+  final ordinals = [
+    "",
+    "أول",
+    "ثاني",
+    "ثالث",
+    "رابع",
+    "خامس",
+    "سادس",
+    "سابع",
+    "ثامن",
+    "تاسع",
+    "عاشر"
+  ];
+
+  final ordinal = the + ordinals[num == 10 ? num : unit];
+  final female = isFeminine ? "ة" : "";
+  final ones = (unit == 1 ? "${the}حادي" : ordinal) + female;
 
   if (num < 11) {
-    return ordinal + (isFeminine && num == 1 ? "ى" : female); // from 1 to 10
+    return ordinal + (isFeminine && num == 1 ? "ى" : female);
   } else if (num < 20) {
-    return "$ones عشر$female"; // from 11 to 19
+    return "$ones عشر$female";
   } else {
-    return "${unit != 0 ? "$ones و" : ""}ال${[
+    final tens = [
       "",
       "",
       "عشر",
@@ -384,7 +430,8 @@ String? ordinalsAr(int? num, {bool isFeminine = false}) {
       "سبع",
       "ثمان",
       "تسع"
-    ][(num ~/ 10)]}ون";
+    ];
+    return "${unit != 0 ? "$ones و" : ""}ال${tens[num ~/ 10]}ون";
   }
 }
 

@@ -21,6 +21,8 @@ class _AqaratyState extends ConsumerState<Aqaraty> {
     WidgetsBinding.instance.addPostFrameCallback(
       (timeStamp) async {
         await ref.read(coreProvider).getCashedUser();
+        ref.read(coreProvider).listenToConnectivityAndSync();
+
         setState(() {});
       },
     );
