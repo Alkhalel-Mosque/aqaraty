@@ -1,14 +1,16 @@
-import 'package:aqaraty/local_data/condition.dart';
-import 'package:aqaraty/local_data/direction.dart';
-import 'package:aqaraty/local_data/furnishing_1.dart';
-import 'package:aqaraty/local_data/property_type.dart';
-import 'package:aqaraty/local_data/types_local.dart';
+import 'package:aqaraty/api/local_data/condition.dart';
+import 'package:aqaraty/api/local_data/currency2.dart';
+import 'package:aqaraty/api/local_data/direction.dart';
+import 'package:aqaraty/api/local_data/furnishing.dart';
+import 'package:aqaraty/api/local_data/property_type.dart';
+import 'package:aqaraty/api/local_data/types_local.dart';
+import 'package:aqaraty/extensions/extension.dart';
+import 'package:aqaraty/provider/notifiers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:aqaraty/components/filter_button.dart';
 import 'package:aqaraty/provider/filter.dart';
 import 'package:aqaraty/models/real_estate.dart';
-import 'package:aqaraty/enums/enums.dart';
 
 class FilterDrawer extends ConsumerStatefulWidget {
   final List<RealEstate> allEstates;
@@ -21,10 +23,10 @@ class FilterDrawer extends ConsumerStatefulWidget {
   });
 
   @override
-  FilterDrawerState createState() => FilterDrawerState();
+  ConsumerState<FilterDrawer> createState() => _FilterDrawerState();
 }
 
-class FilterDrawerState extends ConsumerState<FilterDrawer> {
+class _FilterDrawerState extends ConsumerState<FilterDrawer> {
   late TextEditingController minPriceController;
   late TextEditingController maxPriceController;
   late TextEditingController minAreaController;
@@ -64,7 +66,6 @@ class FilterDrawerState extends ConsumerState<FilterDrawer> {
 
   void applyFilters() {
     final filterNotifier = ref.read(filterProvider.notifier);
-    final filterState = ref.read(filterProvider);
 
     final minPrice = int.tryParse(minPriceController.text);
     final maxPrice = int.tryParse(maxPriceController.text);
@@ -78,6 +79,14 @@ class FilterDrawerState extends ConsumerState<FilterDrawer> {
     filterNotifier.updateRoomsRange(minRooms, maxRooms);
 
     final filtered = widget.allEstates.where((estate) {
+      final filterState = ref.read(filterProvider);
+      final core = ref.read(coreProvider);
+      final estatePriceInFilterCurrency = core.convertPrice(
+        estate.price,
+        estate.currency,
+        filterState.currency ?? Currency.SYP,
+      );
+
       if (filterState.selectedTypes.isNotEmpty &&
           !filterState.selectedTypes.contains(estate.type)) {
         return false;
@@ -86,7 +95,6 @@ class FilterDrawerState extends ConsumerState<FilterDrawer> {
           !filterState.selectedPropertyTypes.contains(estate.propertyType)) {
         return false;
       }
-
       if (filterState.selectedConditions.isNotEmpty &&
           !filterState.selectedConditions.contains(estate.condition)) {
         return false;
@@ -101,11 +109,13 @@ class FilterDrawerState extends ConsumerState<FilterDrawer> {
       }
 
       if (filterState.minPrice != null &&
-          estate.price < filterState.minPrice!) {
+          estatePriceInFilterCurrency != null &&
+          estatePriceInFilterCurrency < filterState.minPrice!) {
         return false;
       }
       if (filterState.maxPrice != null &&
-          estate.price > filterState.maxPrice!) {
+          estatePriceInFilterCurrency != null &&
+          estatePriceInFilterCurrency > filterState.maxPrice!) {
         return false;
       }
 
@@ -119,11 +129,11 @@ class FilterDrawerState extends ConsumerState<FilterDrawer> {
       }
 
       if (filterState.minRooms != null &&
-          estate.rooms < filterState.minRooms!) {
+          (estate.rooms ?? 0) < filterState.minRooms!) {
         return false;
       }
       if (filterState.maxRooms != null &&
-          estate.rooms > filterState.maxRooms!) {
+          (estate.rooms ?? 0) > filterState.maxRooms!) {
         return false;
       }
 
@@ -148,6 +158,7 @@ class FilterDrawerState extends ConsumerState<FilterDrawer> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final filterState = ref.watch(filterProvider);
     final filterNotifier = ref.read(filterProvider.notifier);
 
@@ -159,6 +170,7 @@ class FilterDrawerState extends ConsumerState<FilterDrawer> {
             const Text("فلترة العقارات",
                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
             buildMultiSelect(
+              ctx: context,
               title: "نوع المعاملة",
               options: Types.values,
               selectedValues: filterState.selectedTypes,
@@ -166,6 +178,7 @@ class FilterDrawerState extends ConsumerState<FilterDrawer> {
               getLabel: (e) => e.arName,
             ),
             buildMultiSelect(
+              ctx: context,
               title: "نوع العقار",
               options: PropertyType.values,
               selectedValues: filterState.selectedPropertyTypes,
@@ -173,7 +186,8 @@ class FilterDrawerState extends ConsumerState<FilterDrawer> {
               getLabel: (e) => e.arName,
             ),
             buildMultiSelect(
-              title: "الحالة",
+              ctx: context,
+              title: "الإكساء",
               options: Condition.values,
               selectedValues: filterState.selectedConditions,
               onChanged: (conditions) =>
@@ -181,6 +195,7 @@ class FilterDrawerState extends ConsumerState<FilterDrawer> {
               getLabel: (e) => e.arName,
             ),
             buildMultiSelect(
+              ctx: context,
               title: "الفرش",
               options: Furnishing.values,
               selectedValues: filterState.selectedFurnishings,
@@ -189,6 +204,7 @@ class FilterDrawerState extends ConsumerState<FilterDrawer> {
               getLabel: (e) => e.arName,
             ),
             buildMultiSelect(
+              ctx: context,
               title: "الاتجاه",
               options: Direction.values,
               selectedValues: filterState.selectedDirections,
@@ -197,18 +213,57 @@ class FilterDrawerState extends ConsumerState<FilterDrawer> {
               getLabel: (e) => e.arName,
             ),
             const SizedBox(height: 10),
-            buildRangeInput("السعر", minPriceController, maxPriceController),
-            buildRangeInput("المساحة", minAreaController, maxAreaController),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  "اختر العملة:",
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 16, // المسافة الأفقية بين العناصر
+                  children: Currency.values.map((c) {
+                    return Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Radio<Currency>(
+                          activeColor: theme.focusColor,
+                          value: c,
+                          groupValue: filterState.currency ?? Currency.USD,
+                          onChanged: (val) {
+                            filterNotifier.updateCurrency(val);
+                          },
+                          materialTapTargetSize:
+                              MaterialTapTargetSize.shrinkWrap,
+                        ),
+                        Text(c.symbol, style: const TextStyle(fontSize: 14)),
+                      ],
+                    );
+                  }).toList(),
+                ),
+              ],
+            ),
+            10.getHightSizedBox,
             buildRangeInput(
-                "عدد الغرف", minRoomsController, maxRoomsController),
-            buildBooleanDropdown("صالون", filterState.isWithSalon,
+                "السعر", minPriceController, maxPriceController, context),
+            5.getHightSizedBox,
+            buildRangeInput(
+                "المساحة", minAreaController, maxAreaController, context),
+            5.getHightSizedBox,
+            buildRangeInput(
+                "عدد الغرف", minRoomsController, maxRoomsController, context),
+            5.getHightSizedBox,
+            buildBooleanDropdown(context, "صالون", filterState.isWithSalon,
                 (val) => filterNotifier.updateWithSalon(val)),
-            buildBooleanDropdown("صوفا", filterState.isWithSofa,
+            buildBooleanDropdown(context, "صوفا", filterState.isWithSofa,
                 (val) => filterNotifier.updateWithSofa(val)),
-            buildBooleanDropdown("مكتب", filterState.isOffice,
+            buildBooleanDropdown(context, "مكتب", filterState.isOffice,
                 (val) => filterNotifier.updateIsOffice(val)),
             const SizedBox(height: 16),
             ElevatedButton(
+              style: ButtonStyle(
+                  backgroundColor: WidgetStateProperty.all(theme.focusColor)),
               onPressed: applyFilters,
               child: const Text("تطبيق الفلاتر"),
             ),
@@ -217,7 +272,10 @@ class FilterDrawerState extends ConsumerState<FilterDrawer> {
                 filterNotifier.resetFilters();
                 widget.onFilterChanged(widget.allEstates);
               },
-              child: const Text("إعادة تعيين الفلاتر"),
+              child: const Text(
+                "إعادة تعيين الفلاتر",
+                style: TextStyle(color: Color.fromARGB(213, 246, 83, 71)),
+              ),
             ),
           ],
         ),

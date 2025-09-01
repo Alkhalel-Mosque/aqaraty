@@ -5,10 +5,12 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 
 class MyMap extends StatefulWidget {
+  final bool isEdite;
   final LatLng? coords;
   final void Function(LatLng?) onSave;
 
-  const MyMap({super.key, this.coords, required this.onSave});
+  const MyMap(
+      {super.key, this.coords, required this.onSave, required this.isEdite});
 
   @override
   State<MyMap> createState() => _MyMapState();
@@ -54,18 +56,15 @@ class _MyMapState extends State<MyMap> {
                 TileLayer(
                   // Bring your own tiles
                   maxZoom: 100,
-                  urlTemplate:
-                      'https://tile.openstreetmap.org/{z}/{x}/{y}.png', // For demonstration only
-                  userAgentPackageName:
-                      'com.example.app', // Add your app identifier
-                  // And many more recommended properties!
+                  urlTemplate: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+                  userAgentPackageName: 'com.myapp.maps',
                 ),
                 MarkerLayer(
                   markers: [
                     Marker(
                       point: lat ?? LatLng(0, 0),
                       builder: (ctx) =>
-                          Icon(Icons.location_pin, color: Colors.red),
+                          const Icon(Icons.location_pin, color: Colors.red),
                     ),
                   ],
                 ),
@@ -74,9 +73,10 @@ class _MyMapState extends State<MyMap> {
           ),
           if (lat != null)
             IconButton(
-              onPressed: _ondelete,
-              icon: Icon(Icons.delete, color: Colors.red),
-            ),
+                onPressed: _ondelete,
+                icon: widget.isEdite
+                    ? const Icon(Icons.delete, color: Colors.red)
+                    : const SizedBox.shrink()),
         ],
       ),
     );

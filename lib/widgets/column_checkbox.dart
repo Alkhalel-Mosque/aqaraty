@@ -17,6 +17,8 @@ class ColumnCheckBox extends StatelessWidget {
       children: [
         Text(text),
         Checkbox(
+          activeColor: Theme.of(context).focusColor,
+          checkColor: Colors.black,
           value: value,
           onChanged: onChanged,
         ),

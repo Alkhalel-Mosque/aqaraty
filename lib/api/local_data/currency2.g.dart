@@ -1,40 +1,35 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'furnishing_1.dart';
+part of 'currency2.dart';
 
 // **************************************************************************
 // TypeAdapterGenerator
 // **************************************************************************
 
-class FurnishingAdapter extends TypeAdapter<Furnishing> {
+class CurrencyAdapter extends TypeAdapter<Currency> {
   @override
-  final int typeId = 11;
+  final int typeId = 40;
 
   @override
-  Furnishing read(BinaryReader reader) {
+  Currency read(BinaryReader reader) {
     switch (reader.readByte()) {
       case 0:
-        return Furnishing.full;
+        return Currency.SYP;
       case 1:
-        return Furnishing.semi;
-      case 2:
-        return Furnishing.none;
+        return Currency.USD;
       default:
-        return Furnishing.full;
+        return Currency.SYP;
     }
   }
 
   @override
-  void write(BinaryWriter writer, Furnishing obj) {
+  void write(BinaryWriter writer, Currency obj) {
     switch (obj) {
-      case Furnishing.full:
+      case Currency.SYP:
         writer.writeByte(0);
         break;
-      case Furnishing.semi:
+      case Currency.USD:
         writer.writeByte(1);
-        break;
-      case Furnishing.none:
-        writer.writeByte(2);
         break;
     }
   }
@@ -45,7 +40,7 @@ class FurnishingAdapter extends TypeAdapter<Furnishing> {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is FurnishingAdapter &&
+      other is CurrencyAdapter &&
           runtimeType == other.runtimeType &&
           typeId == other.typeId;
 }

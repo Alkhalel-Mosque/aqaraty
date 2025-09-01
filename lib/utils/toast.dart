@@ -6,7 +6,6 @@ class CustomToast {
   static const String copySuccsed = "تم النسخ إلى الحافظة!";
 
   static showToast(String content) {
-    print(content);
     Fluttertoast.cancel();
     Fluttertoast.showToast(
       msg: content,

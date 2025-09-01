@@ -1,124 +1,307 @@
 import 'package:aqaraty/components/custom_image.dart';
-import 'package:aqaraty/enums/enums.dart';
-import 'package:aqaraty/local_data/request_status.dart';
+import 'package:aqaraty/api/local_data/request_status.dart';
 import 'package:aqaraty/models/real_estate.dart';
-import 'package:aqaraty/pages/add_page.dart';
+import 'package:aqaraty/pages/info_page.dart';
+import 'package:aqaraty/provider/notifiers.dart';
 import 'package:aqaraty/router/router.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_cache_manager/flutter_cache_manager.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:iconsax/iconsax.dart';
 import 'package:intl/intl.dart';
 
-class RealestateCard extends StatelessWidget {
-  const RealestateCard({super.key, required this.realEstate});
+class RealEstateCard extends ConsumerStatefulWidget {
+  const RealEstateCard({super.key, required this.realEstate});
   final RealEstate realEstate;
 
-  /// Return appropriate icon for message status
-  Icon _getStatusIcon() {
-    switch (realEstate.requestStatus) {
+  @override
+  ConsumerState<RealEstateCard> createState() => _RealEstateCardState();
+}
+
+class _RealEstateCardState extends ConsumerState<RealEstateCard> {
+  Color _getStatusColor(BuildContext context) {
+    final theme = Theme.of(context);
+    switch (widget.realEstate.requestStatus) {
       case RequestStatus.pending:
-        return Icon(Icons.access_time);
+        return Colors.amber[600]!;
       case RequestStatus.complete:
-        return Icon(Icons.done);
-
+        return Colors.teal[400]!;
       case RequestStatus.canceled:
-        return Icon(Icons.close);
-
+        return theme.colorScheme.error;
       default:
-        return Icon(Icons.warning_amber);
+        return theme.colorScheme.outline;
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    print(realEstate.gallary);
-    return Banner(
-      message: realEstate.type!.arName,
-      color: theme.colorScheme.primaryContainer,
-      textStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-      location: BannerLocation.topStart,
-      child: InkWell(
-        onTap: () {
-          context.myPush(AddPage(realEstate: realEstate));
-        },
-        child: Container(
-          padding: const EdgeInsets.all(8.0),
-          child: Stack(
-            alignment: Alignment.bottomCenter,
-            children: [
-              CustomImage(path: realEstate.gallary?.firstOrNull),
-              Container(
-                width: double.infinity,
-                decoration: BoxDecoration(
+    final coreProv = ref.watch(coreProvider);
+    final realEstate = coreProv.realEstates.firstWhere(
+      (e) => e.id == widget.realEstate.id,
+      orElse: () => widget.realEstate,
+    );
+
+    return GestureDetector(
+      onTap: () => context.myPush(InfoPage(realEstate: realEstate)),
+      child: Container(
+        margin: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+        decoration: BoxDecoration(
+          color: const Color(0xffD9D6D1),
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: theme.shadowColor.withOpacity(0.1),
+              blurRadius: 12,
+              spreadRadius: 2,
+              offset: const Offset(0, 4),
+            )
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // صورة العقار + الحالة
+            Stack(
+              children: [
+                ClipRRect(
                   borderRadius: const BorderRadius.only(
-                      bottomLeft: Radius.circular(10),
-                      bottomRight: Radius.circular(10)),
-                  gradient: LinearGradient(
-                    begin: AlignmentDirectional.topCenter,
-                    end: AlignmentDirectional.bottomCenter,
-                    colors: [
-                      theme.colorScheme.onPrimary.withOpacity(0.5),
-                      theme.colorScheme.onPrimary.withOpacity(1),
-                    ],
+                      topLeft: Radius.circular(12),
+                      topRight: Radius.circular(12)),
+                  child: AspectRatio(
+                    aspectRatio: 17 / 9,
+                    child: CustomImage(
+                      realEstate: realEstate,
+                      path: realEstate.galleryImageIds?.firstOrNull,
+                    ),
                   ),
                 ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    _getStatusIcon(),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        PieceOfInfo(
-                          text: realEstate.getPrice,
-                          iconData: Icons.attach_money,
-                        ),
-                        PieceOfInfo(
-                          text: realEstate.getRoomsWithExtra,
-                          iconData: Icons.door_back_door_outlined,
-                        ),
-                      ],
+
+                // تدرج غامق أسفل الصورة
+                Positioned.fill(
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      borderRadius:
+                          const BorderRadius.vertical(top: Radius.circular(16)),
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Colors.transparent,
+                          Colors.black.withOpacity(0.3),
+                        ],
+                      ),
                     ),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        PieceOfInfo(
-                          text: realEstate.getFloor ?? "",
-                          iconData: Icons.home_work_outlined,
-                        ),
-                        PieceOfInfo(
-                          text: realEstate.locationArea!,
-                          iconData: Icons.location_on_outlined,
-                        ),
-                        Text(
-                          realEstate.createdAt != null
-                              ? 'تمت الإضافة في: ${DateFormat('yyyy/MM/dd – HH:mm').format(realEstate.createdAt!)}'
-                              : 'تاريخ غير متوفر',
-                          style: TextStyle(fontSize: 10, color: Colors.grey),
-                        ),
-                      ],
-                    ),
-                  ],
+                  ),
                 ),
+
+                // حالة الطلب
+                Positioned(
+                  top: 12,
+                  right: 12,
+                  child: Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                    decoration: BoxDecoration(
+                      color: _getStatusColor(context),
+                      borderRadius: BorderRadius.circular(20),
+                      boxShadow: [
+                        BoxShadow(
+                          color: theme.shadowColor.withOpacity(0.2),
+                          blurRadius: 4,
+                          offset: const Offset(0, 2),
+                        )
+                      ],
+                    ),
+                    child: Text(
+                      realEstate.requestStatus!.arName,
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+
+            // تفاصيل العقار
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: theme.cardColor,
+                borderRadius:
+                    const BorderRadius.vertical(bottom: Radius.circular(16)),
               ),
-            ],
-          ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // العنوان والسعر
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          realEstate.getRoomsWithExtra,
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Text(
+                        "${NumberFormat.decimalPattern().format(realEstate.price ?? 0)} ${realEstate.currency?.symbol ?? ''}",
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 8),
+
+                  // الموقع
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.location_on_outlined,
+                        size: 16,
+                        color: theme.colorScheme.outline,
+                      ),
+                      const SizedBox(width: 4),
+                      Expanded(
+                        child: Text(
+                          realEstate.locationArea ?? 'موقع غير محدد',
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: theme.colorScheme.outline,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 12),
+
+                  // مميزات إضافية
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.secondary,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        _FeatureItem(
+                          icon: Iconsax.ram,
+                          value: realEstate.ownershipType?.arName ?? '',
+                          label: 'ملكية',
+                        ),
+                        _FeatureItem(
+                          icon: Iconsax.building,
+                          value: realEstate.propertyType!.arName,
+                          label: 'نوع العقار',
+                        ),
+                        _FeatureItem(
+                          icon: Icons.aspect_ratio_outlined,
+                          value: realEstate.area?.toString() ?? '0',
+                          label: 'م²',
+                        ),
+                        _FeatureItem(
+                          icon: Icons.apartment_outlined,
+                          value: realEstate.getFloor ?? '-',
+                          label: 'طابق',
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(height: 12),
+
+                  // التاريخ + زر التفاصيل
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        realEstate.createdAt != null
+                            ? 'أضيف: ${DateFormat('yyyy/M/d').format(realEstate.createdAt!)}'
+                            : 'تاريخ غير معروف',
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.outline,
+                        ),
+                      ),
+                      TextButton(
+                        style: TextButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 6),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          backgroundColor: theme.colorScheme.secondary,
+                        ),
+                        onPressed: () =>
+                            context.myPush(InfoPage(realEstate: realEstate)),
+                        child: Text(
+                          'عرض التفاصيل',
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: theme.colorScheme.outline,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
 }
 
-class PieceOfInfo extends StatelessWidget {
-  const PieceOfInfo({super.key, required this.text, required this.iconData});
-  final String text;
-  final IconData iconData;
+class _FeatureItem extends StatelessWidget {
+  final IconData icon;
+  final String value;
+  final String label;
+
+  const _FeatureItem({
+    required this.icon,
+    required this.value,
+    required this.label,
+  });
+
   @override
   Widget build(BuildContext context) {
-    return Row(children: [
-      Icon(iconData),
-      Text(text),
-    ]);
+    final theme = Theme.of(context);
+
+    return Column(
+      children: [
+        Icon(
+          icon,
+          size: 20,
+          color: theme.colorScheme.onPrimary,
+        ),
+        const SizedBox(height: 4),
+        Text(
+          value,
+          style: theme.textTheme.bodyMedium?.copyWith(
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        Text(
+          label,
+          style: theme.textTheme.bodySmall?.copyWith(
+            color: theme.colorScheme.outline,
+            fontSize: 10,
+          ),
+        ),
+      ],
+    );
   }
 }

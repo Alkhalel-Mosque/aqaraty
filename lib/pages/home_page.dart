@@ -1,3 +1,5 @@
+import 'package:aqaraty/components/back_ground_effict.dart';
+import 'package:aqaraty/components/my_snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive/hive.dart';
@@ -46,20 +48,16 @@ class _HomePageState extends ConsumerState<HomePage> {
   }
 
   Future<void> saveToLocal(List<RealEstate> list) async {
-    try {
-      await _hiveBox.clear();
-
-      // حفظ البيانات مع استخدام الـ id كمفتاح
-      final Map<String, RealEstate> data = {
-        for (var estate in list)
-          if (estate.id != null) estate.id!: estate
-      };
-
-      await _hiveBox.putAll(data);
-      print('تم حفظ ${data.length} عنصر محلياً');
-    } catch (e) {
-      print('خطأ في حفظ البيانات محلياً: $e');
-      CustomToast.showToast("❗ فشل في حفظ البيانات محلياً");
+    if (list.isEmpty) {
+      return;
+    }
+    await _hiveBox.clear();
+    for (var estate in list) {
+      if (estate.id != null) {
+        await _hiveBox.put(estate.id, estate);
+      } else {
+        await _hiveBox.add(estate);
+      }
     }
   }
 
@@ -69,10 +67,9 @@ class _HomePageState extends ConsumerState<HomePage> {
       localData.sort((a, b) =>
           (b.createdAt ?? DateTime(0)).compareTo(a.createdAt ?? DateTime(0)));
 
-      print('تم تحميل ${localData.length} عنصر من التخزين المحلي');
       return localData;
     } catch (e) {
-      print('خطأ في تحميل البيانات المحلية: $e');
+      CustomToast.showToast('خطأ في تحميل البيانات المحلية: $e');
       return [];
     }
   }
@@ -82,24 +79,26 @@ class _HomePageState extends ConsumerState<HomePage> {
 
     try {
       final localData = await loadFromLocal();
+
       if (localData.isNotEmpty) {
         setState(() => realEstates = localData);
-        CustomToast.showToast("📦 عرض البيانات المحفوظة محلياً");
       }
 
       final isOnline = await hasInternet();
       if (isOnline) {
         await ref.read(coreProvider).featchData();
         final result = [...ref.read(coreProvider).realEstates];
+        result.sort((a, b) =>
+            (b.createdAt ?? DateTime(0)).compareTo(a.createdAt ?? DateTime(0)));
+
         await saveToLocal(result);
+
         setState(() => realEstates = result);
-        CustomToast.showToast("✅ تم تحديث البيانات من السيرفر");
       } else if (localData.isEmpty) {
         CustomToast.showToast("⚠️ لا يوجد اتصال، ولا توجد بيانات محلية");
       }
     } catch (e) {
-      print('❌ خطأ في تحميل البيانات: $e');
-      CustomToast.showToast("❗ حدث خطأ في تحميل البيانات");
+      CustomToast.showToast('خطأ في تحميل البيانات المحلية: $e');
     } finally {
       setState(() => isLoading = false);
     }
@@ -107,38 +106,63 @@ class _HomePageState extends ConsumerState<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
       floatingActionButton: FloatingActionButton(
-        child: const Icon(Icons.add),
-        onPressed: () => context.myPush(const AddPage()),
-      ),
+          backgroundColor: theme.focusColor,
+          child: const Icon(
+            Icons.add,
+            color: Colors.white,
+          ),
+          onPressed: () async {
+            final result = await context.myPush(const AddPage());
+
+            if (result != null && result is RealEstate) {
+              setState(() {
+                realEstates = realEstates
+                    .map((item) => item.id == result.id ? result : item)
+                    .toList();
+              });
+            }
+            await loadData();
+          }),
       drawer: const MyDrawer(),
-      body: SafeArea(
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: CustomSearchBar(
-                resultBuilder: (p0, p1, p2) => RealestateCard(
-                  realEstate: p2,
+      body: Stack(
+        children: [
+          background(context),
+          circl1(context),
+          circl2(context),
+          SafeArea(
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: CustomSearchBar(
+                    resultBuilder: (p0, p1, p2) => RealEstateCard(
+                      realEstate: p2,
+                    ),
+                    hint: "ابحث عن عقار...",
+                    title: "عقاراتي",
+                    allEstates: realEstates,
+                  ),
                 ),
-                hint: "ابحث عن عقار...",
-                title: "عقاراتي",
-                allEstates: realEstates,
-              ),
+                Expanded(
+                  child: _buildContent(context),
+                ),
+              ],
             ),
-            Expanded(
-              child: _buildContent(),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildContent() {
+  Widget _buildContent(BuildContext ctx) {
     if (isLoading) {
-      return const Center(child: CircularProgressIndicator());
+      return Center(
+          child: CircularProgressIndicator(
+        color: Theme.of(context).cardColor,
+      ));
     }
 
     if (realEstates.isEmpty) {
@@ -160,7 +184,7 @@ class _HomePageState extends ConsumerState<HomePage> {
       onRefresh: loadData,
       child: ListView.builder(
         itemCount: realEstates.length,
-        itemBuilder: (context, index) => RealestateCard(
+        itemBuilder: (context, index) => RealEstateCard(
           realEstate: realEstates[index],
         ),
       ),

@@ -29,7 +29,7 @@ class CustomSearchBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainer,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(100),
       ),
       constraints: const BoxConstraints(minHeight: 50),
@@ -71,7 +71,7 @@ class CustomSearchBar extends StatelessWidget {
                     ),
                   );
                 },
-                icon: Icon(Icons.search)),
+                icon: const Icon(Icons.search)),
           ],
         ),
       ),

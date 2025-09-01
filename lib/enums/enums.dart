@@ -9,14 +9,14 @@
 //   bool get isOffer => this == sell || this == rentOut;
 //   bool get isRequest => this == rent || this == buy;
 
-//   String get arName {
-//     return switch (this) {
-//       sell => "للبيع",
-//       buy => "للشراء",
-//       rent => "للاستئجاء",
-//       rentOut => "للإيجار",
-//     };
-//   }
+  // String get arName {
+  //   return switch (this) {
+  //     sell => "للبيع",
+  //     buy => "للشراء",
+  //     rent => "للاستئجاء",
+  //     rentOut => "للإيجار",
+  //   };
+  // }
 
 //   static Types getFromString(String string) {
 //     return switch (string) {

@@ -1,9 +1,13 @@
+import 'dart:io';
 import 'package:aqaraty/components/my_snackbar.dart';
+import 'package:aqaraty/pages/setting_page.dart';
 import 'package:aqaraty/pages/new_log.dart';
+import 'package:aqaraty/pages/panding_page.dart';
 import 'package:aqaraty/provider/notifiers.dart';
 import 'package:aqaraty/router/router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:iconsax/iconsax.dart';
 
 class MyDrawer extends ConsumerStatefulWidget {
   const MyDrawer({super.key});
@@ -13,135 +17,189 @@ class MyDrawer extends ConsumerStatefulWidget {
 }
 
 class _MyDrawerState extends ConsumerState<MyDrawer> {
-  double? containerHight = 0;
-  late double w;
+  bool showAccounts = false;
 
   @override
   Widget build(BuildContext context) {
     final coreProvRead = ref.read(coreProvider);
+    final theme = Theme.of(context);
 
-    w = MediaQuery.of(context).size.width * 0.9;
     return Drawer(
-      width: w,
-      child: Column(
-        children: [
-          Expanded(
-              child: ListView(
-            reverse: false,
-            children: [
-              UserAccountsDrawerHeader(
-                onDetailsPressed: () {
-                  setState(() {
-                    containerHight == 0
-                        ? containerHight = 180
-                        : containerHight = 0;
-                  });
-                },
+      width: MediaQuery.of(context).size.width * 0.82,
+      backgroundColor: theme.scaffoldBackgroundColor,
+      child: SafeArea(
+        child: Column(
+          children: [
+            GestureDetector(
+              onTap: () {
+                setState(() {
+                  showAccounts = !showAccounts;
+                });
+              },
+              child: Container(
+                margin: const EdgeInsets.all(16),
+                padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                    color: Theme.of(context).appBarTheme.backgroundColor),
-                accountName: Text(coreProvRead.user?.username ?? ""),
-                accountEmail: Text(coreProvRead.user?.phonenumber ?? ""),
-                currentAccountPicture: GestureDetector(
-                  onTap: () {},
-                  child: Hero(
-                    tag: 0,
-                    child: ClipOval(
-                      child: SizedBox.square(
-                          dimension: 100,
-                          child: Image.asset("assets/images/profile.png")),
-                    ),
-                  ),
+                  color: const Color.fromARGB(28, 158, 158, 158),
+                  borderRadius: BorderRadius.circular(20),
                 ),
-              ),
-              AnimatedContainer(
-                  height: containerHight,
-                  duration: const Duration(milliseconds: 100),
-                  child: ListView(
-                      physics: const NeverScrollableScrollPhysics(),
-                      children: [
-                        ListTile(
-                          title: const Text("Add Account"),
-                          leading: const Icon(Icons.add),
-                          onTap: () {},
+                child: Row(
+                  children: [
+                    CircleAvatar(
+                      radius: 28,
+                      backgroundColor:
+                          theme.colorScheme.primary.withOpacity(0.1),
+                      child: ClipOval(
+                        child: Image.asset(
+                          "assets/images/profile.png",
+                          width: 50,
+                          height: 50,
+                          fit: BoxFit.cover,
                         ),
-                        const Divider(color: Colors.grey),
-                      ])),
-              ListTile(
-                title: const Text('Help'),
-                leading: const Icon(
-                  Icons.help_center,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            coreProvRead.user?.username ?? "Guest User",
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 17,
+                            ),
+                          ),
+                          Text(
+                            coreProvRead.user?.phonenumber ?? "No phone linked",
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: Colors.grey[600],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Icon(
+                      showAccounts ? Iconsax.arrow_up_2 : Iconsax.arrow_down_1,
+                      color: theme.colorScheme.primary,
+                    ),
+                  ],
                 ),
-                onTap: () async {
-                  // MyRouter.myPush(context, GameWidget(game: MyGame()));
-                },
               ),
-            ],
-          )),
-          ListTile(
-            title: const Text('Log out'),
-            leading: const Icon(
-              Icons.logout,
             ),
-            subtitle: const Text('Logging out this account from this device'),
-            onTap: () async {
-              final res = await MySnackBar.showYesNoDialog(
-                  context, "Are you sure you want to Log out?");
-              if (res) {
-                await coreProvRead.fullLogout();
-                context.myPushReplacmentAll(LoginPage());
-              }
-            },
-          ),
-        ],
+
+            // --- Accounts Section ---
+            AnimatedCrossFade(
+              firstChild: const SizedBox.shrink(),
+              secondChild: Column(
+                children: [
+                  ListTile(
+                    leading: const CircleAvatar(
+                      radius: 18,
+                      backgroundImage: AssetImage("assets/images/profile.png"),
+                    ),
+                    title: const Text("Account 2"),
+                    onTap: () {},
+                  ),
+                  ListTile(
+                    leading: const Icon(Iconsax.add),
+                    title: const Text("إضافة حساب"),
+                    onTap: () {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text("إضافة حساب جديد")),
+                      );
+                    },
+                  ),
+                  const Divider(),
+                ],
+              ),
+              crossFadeState: showAccounts
+                  ? CrossFadeState.showSecond
+                  : CrossFadeState.showFirst,
+              duration: const Duration(milliseconds: 250),
+            ),
+
+            // --- Menu Items ---
+            Expanded(
+              child: ListView(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                children: [
+                  _drawerItem(
+                    isLogout: true,
+                    context,
+                    icon: Iconsax.cloud,
+                    label: "عقارات قيد الرفع",
+                    onTap: () {
+                      Navigator.pop(context);
+                      context.myPush(const PendingEstatesPage());
+                    },
+                  ),
+                  _drawerItem(
+                    isLogout: true,
+                    context,
+                    icon: Iconsax.message_question,
+                    label: "Help",
+                    onTap: () {},
+                  ),
+                  _drawerItem(
+                    isLogout: true,
+                    context,
+                    icon: Iconsax.setting_2,
+                    label: "الإعدادات",
+                    onTap: () {
+                      context.myPush(SettingsPage());
+                    },
+                  ),
+                  _drawerItem(
+                    isLogout: false,
+                    context,
+                    icon: Iconsax.logout,
+                    label: "تسجيل خروج",
+                    onTap: () async {
+                      final res = await MySnackBar.showYesNoDialog(
+                        context,
+                        "هل أنت متأكد من تسجيل الخروج؟",
+                      );
+                      if (res) {
+                        await coreProvRead.fullLogout();
+                        context.myPushReplacmentAll(LoginPage());
+                      }
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _drawerItem(BuildContext context,
+      {required IconData icon,
+      required String label,
+      required VoidCallback onTap,
+      required bool isLogout}) {
+    final theme = Theme.of(context);
+    return ListTile(
+      contentPadding: const EdgeInsets.symmetric(vertical: 6, horizontal: 16),
+      leading: CircleAvatar(
+        backgroundColor: theme.focusColor,
+        child: Icon(icon, color: theme.canvasColor, size: 24),
+      ),
+      title: Text(
+        label,
+        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+              fontWeight: FontWeight.bold,
+              fontSize: 16,
+              color: isLogout ? theme.canvasColor : Colors.red,
+            ),
+      ),
+      onTap: onTap,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(14),
       ),
     );
   }
 }
-
-// LatLng? lat;
-//      final ctl = MapController();
-//     return FlutterMap(
-//       mapController: ctl,
-//       options: MapOptions(
-//         center: LatLng(33.5449, 36.3233), // Damascus coordinates
-//         zoom: 17,
-//       ),
-//       children: [
-//         TileLayer(
-//           // Bring your own tiles
-//           maxZoom: 100,
-//           urlTemplate:
-//               'https://tile.openstreetmap.org/{z}/{x}/{y}.png', // For demonstration only
-//           userAgentPackageName: 'com.example.app', // Add your app identifier
-//           // And many more recommended properties!
-//         ),
-//         MarkerLayer(
-//           markers: [
-//             Marker(
-//               point: lat ?? LatLng(0, 0),
-//               builder: (ctx) => Icon(Icons.location_pin, color: Colors.red),
-//             ),
-//           ],
-//         ),
-//         MarkerLayer(
-//           markers: [
-//             Marker(
-//               point: LatLng(33.545405, 36.322474),
-//               builder: (ctx) => Icon(Icons.location_pin, color: Colors.red),
-//             ),
-//           ],
-//         ),
-
-//         // MarkerLayer(
-//         //   markers: [
-//         //     Marker(
-//         //       point: LatLng(_currentPosition?.latitude??0, _currentPosition?.longitude??0),
-//         //       builder: (ctx) =>
-//         //           Icon(Icons.location_pin, color: Colors.blue),
-//         //     ),
-//         //   ],
-//         // ),
-//       ],
-//     );
-//   }
-// }

@@ -1,5 +1,8 @@
+import 'package:aqaraty/image/data/repositories/service.dart';
 import 'package:aqaraty/pages/home_page.dart';
 import 'package:aqaraty/provider/notifiers.dart';
+import 'package:aqaraty/themes/light_theme.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../pages/new_log.dart';
@@ -21,8 +24,12 @@ class _AqaratyState extends ConsumerState<Aqaraty> {
     WidgetsBinding.instance.addPostFrameCallback(
       (timeStamp) async {
         await ref.read(coreProvider).getCashedUser();
-        ref.read(coreProvider).listenToConnectivityAndSync();
 
+        Connectivity().onConnectivityChanged.listen((result) {
+          if (result != ConnectivityResult.none) {
+            ref.read(coreProvider).syncPendingProperties();
+          }
+        });
         setState(() {});
       },
     );
@@ -31,6 +38,7 @@ class _AqaratyState extends ConsumerState<Aqaraty> {
 
   @override
   Widget build(BuildContext context) {
+    final core = ref.watch(coreProvider);
     final user = ref.read(coreProvider).user;
     return MaterialApp(
       debugShowCheckedModeBanner: false,
@@ -40,6 +48,7 @@ class _AqaratyState extends ConsumerState<Aqaraty> {
         GlobalCupertinoLocalizations.delegate,
       ],
       supportedLocales: const [Locale('ar')],
+      themeMode: core.themeMode,
       theme: lightTheme,
       darkTheme: darkTheme,
       locale: const Locale("ar"),

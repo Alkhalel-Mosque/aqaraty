@@ -46,9 +46,9 @@ class MySnackBar {
     return await showTowOptionDialog(
       context: context,
       content: content,
-      agreeText: "Yes",
-      refuseText: "No",
-      title: "Warning",
+      agreeText: "نعم",
+      refuseText: "لا",
+      title: "تحذير",
     );
   }
 
@@ -61,10 +61,8 @@ class MySnackBar {
   }) async {
     return await showDialog(
           context: context,
-          // barrierColor: dialogBackground.withOpacity(0.1),
           builder: (context) {
             return AlertDialog(
-              // backgroundColor: dialogBackground,
               actionsPadding:
                   const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
               shape: RoundedRectangleBorder(
@@ -74,15 +72,13 @@ class MySnackBar {
               actions: [
                 TextButton(
                     style: ButtonStyle(
-                      shape: MaterialStatePropertyAll(
+                      shape: WidgetStatePropertyAll(
                         RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10),
                         ),
                       ),
-                      overlayColor: MaterialStatePropertyAll(Theme.of(context)
-                          .colorScheme
-                          .secondary
-                          .withOpacity(0.3)),
+                      overlayColor: WidgetStatePropertyAll(
+                          Theme.of(context).colorScheme.primary),
                     ),
                     onPressed: () {
                       Navigator.pop(context, false);
@@ -90,7 +86,7 @@ class MySnackBar {
                     child: Text(
                       refuseText,
                       style: TextStyle(
-                          color: Theme.of(context).colorScheme.secondary),
+                          color: Theme.of(context).colorScheme.onPrimary),
                     )),
                 TextButton(
                     style: ButtonStyle(

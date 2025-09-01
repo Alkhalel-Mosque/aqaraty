@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:photo_view/photo_view_gallery.dart';
@@ -22,7 +24,8 @@ class GalleryView extends StatefulWidget {
 }
 
 class _GalleryViewState extends State<GalleryView> {
-  bool _isValidImageUrl(String url) {
+  bool _isValidImageUrl(String? url) {
+    if (url == null || url.isEmpty) return false;
     try {
       final uri = Uri.parse(url);
       return uri.isAbsolute && (uri.scheme == 'http' || uri.scheme == 'https');
@@ -44,7 +47,7 @@ class _GalleryViewState extends State<GalleryView> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.white),
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => Navigator.of(context).pop(),
         ),
       ),
@@ -53,13 +56,20 @@ class _GalleryViewState extends State<GalleryView> {
         scrollPhysics: const BouncingScrollPhysics(),
         builder: (BuildContext context, int index) {
           final item = widget.galleryItems[index];
+          final String url = item.imageUrl;
+
+          ImageProvider imageProvider;
+
+          if (_isValidImageUrl(url)) {
+            imageProvider = CachedNetworkImageProvider(url);
+          } else if (File(url).existsSync()) {
+            imageProvider = FileImage(File(url)); // دعم ملفات محلية
+          } else {
+            imageProvider = const AssetImage('assets/placeholder.png');
+          }
+
           return PhotoViewGalleryPageOptions(
-            imageProvider: _isValidImageUrl(item.imageUrl)
-                ? CachedNetworkImageProvider(item.imageUrl)
-                : AssetImage('assets/placeholder.png') as ImageProvider,
-            errorBuilder: (context, error, stackTrace) => Center(
-              child: Icon(Icons.broken_image, color: Colors.grey),
-            ),
+            imageProvider: imageProvider,
             initialScale: PhotoViewComputedScale.contained * 0.8,
             heroAttributes: PhotoViewHeroAttributes(tag: item.id),
             minScale: PhotoViewComputedScale.contained * 0.5,
@@ -72,14 +82,18 @@ class _GalleryViewState extends State<GalleryView> {
             width: 50,
             height: 50,
             child: CircularProgressIndicator(
-              value: event?.cumulativeBytesLoaded.toDouble() ?? 0,
-              valueColor: AlwaysStoppedAnimation(Colors.blue),
+              value: event?.cumulativeBytesLoaded != null &&
+                      event?.expectedTotalBytes != null
+                  ? event!.cumulativeBytesLoaded /
+                      event.expectedTotalBytes!.toDouble()
+                  : null,
+              valueColor: const AlwaysStoppedAnimation(Colors.blue),
               strokeWidth: 3,
             ),
           ),
         ),
-        backgroundDecoration:
-            widget.backgroundDecoration ?? BoxDecoration(color: Colors.black),
+        backgroundDecoration: widget.backgroundDecoration ??
+            const BoxDecoration(color: Colors.black),
         pageController: widget.pageController,
         onPageChanged: widget.onPageChanged,
       ),

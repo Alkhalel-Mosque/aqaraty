@@ -1,3 +1,9 @@
+import 'dart:io';
+
+import 'package:aqaraty/image/data/repositories/image_repository_impl.dart';
+import 'package:aqaraty/image/domain/usecase.dart/upload_image.dart';
+
+import 'package:aqaraty/models/real_estate.dart';
 import 'package:flutter/material.dart';
 
 extension SizedBoxInt on int {
@@ -34,5 +40,21 @@ extension ListExtension on List {
     } else {
       add(object);
     }
+  }
+}
+
+extension RealEstateImagesExt on RealEstate {
+  Future<RealEstate> uploadGalleryImages(
+      UploadImage repo, List<File> images) async {
+    final uploadedImageIds = <String>[];
+
+    for (var image in images) {
+      final imageId = await repo(image.path);
+      if (imageId != null) {
+        uploadedImageIds.add(imageId);
+      }
+    }
+
+    return copyWith(galleryImageIds: uploadedImageIds);
   }
 }

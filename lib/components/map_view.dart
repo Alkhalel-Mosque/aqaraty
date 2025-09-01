@@ -108,9 +108,8 @@ class _MapViewState extends State<MapView> {
             ),
             children: [
               TileLayer(
-                maxZoom: 100,
-                urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                userAgentPackageName: 'com.example.app',
+                urlTemplate: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+                userAgentPackageName: 'com.myapp.maps',
               ),
               if (markerPosition != null)
                 MarkerLayer(

@@ -1,9 +1,11 @@
+import 'package:aqaraty/models/real_estate.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'my_text_form_field.dart';
 
 class MyAutoComplete extends StatefulWidget {
+  final RealEstate realEstate;
   final void Function(String)? onChanged;
   final String? initVal;
   final String labelText;
@@ -23,6 +25,7 @@ class MyAutoComplete extends StatefulWidget {
     this.onChanged,
     required this.data,
     this.initVal,
+    required this.realEstate,
   });
 
   @override
@@ -39,6 +42,7 @@ class _MyAutoCompleteState extends State<MyAutoComplete> {
       controller: textEditingController,
       builder: (context, controller, focusNode) {
         return MyTextFormField(
+          realEstate: widget.realEstate,
           focusnode: focusNode,
           onChanged: (val) {
             widget.onChanged!(val);
@@ -52,6 +56,7 @@ class _MyAutoCompleteState extends State<MyAutoComplete> {
         );
       },
       hideOnLoading: true,
+      hideOnError: true,
       onSelected: (value) {
         textEditingController.text = value;
         widget.onSelected(value);
@@ -59,14 +64,14 @@ class _MyAutoCompleteState extends State<MyAutoComplete> {
       decorationBuilder: (context, child) {
         return Material(
           type: MaterialType.card,
-          elevation: 4,
+          elevation: 100,
           color: theme.colorScheme.surfaceContainerLow,
           borderRadius: BorderRadius.circular(15),
           child: child,
         );
       },
       itemBuilder: (context, itemData) {
-        return CupertinoListTile(
+        return ListTile(
           title: Text(
             itemData,
             style: theme.textTheme.bodyMedium,
@@ -84,7 +89,7 @@ class _MyAutoCompleteState extends State<MyAutoComplete> {
         //       .toList();
         //   return matches;
       },
-      hideOnEmpty: true,
+      hideOnEmpty: false,
     );
   }
 }

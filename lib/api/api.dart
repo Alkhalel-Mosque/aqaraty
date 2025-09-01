@@ -1,30 +1,29 @@
 import 'dart:developer';
-import 'dart:io';
 
+import 'package:aqaraty/image/domain/repositories/image_repository.dart';
 import 'package:aqaraty/models/real_estate.dart';
+import 'package:aqaraty/utils/toast.dart';
 import 'package:parse_server_sdk_flutter/parse_server_sdk_flutter.dart';
 
 class Api {
+  final ImageRepository? imageRepository;
+
+  Api([this.imageRepository]);
+
   Future<bool> login(String username, String password) async {
     final parseUser = ParseUser(username, password, null);
     var response = await parseUser.login();
 
-    if (response.success) {
-      return true;
-    } else {
-      return false;
-    }
+    return response.success;
   }
 
   Future<List<RealEstate>> fetchAllItems() async {
-    print("fetchAllItems");
     QueryBuilder<ParseObject> queryBuilder =
         QueryBuilder<ParseObject>(ParseObject('real_estate'))
           ..includeObject(['user']);
 
     final ParseResponse response = await queryBuilder.query();
     if (response.success && response.results != null) {
-      print("object");
       return (response.results as List<ParseObject>)
           .map((e) => RealEstate.realEstateFromParseObject(e))
           .toList();
@@ -36,61 +35,17 @@ class Api {
 
   Future<String?> addRealEstate(RealEstate realEstate) async {
     final data = await realEstate.realEstateToParseObject(realEstate);
-    // Save the object
     final res = await data.save();
 
     if (res.success) {
       final object = res.result as ParseObject;
 
+      final freshRealEstate = RealEstate.realEstateFromParseObject(object);
+      realEstate.galleryImageIds = freshRealEstate.galleryImageIds;
+
       return object.objectId;
     } else {
-      throw Exception('Failed to fetch data: ${res.error?.message}');
-    }
-  }
-
-  Future<List<String>> uploadImages(List<String> imageFiles) async {
-    // Handle image upload
-    List<String> imageUrls = [];
-
-    for (final imageFile in imageFiles) {
-      if (imageFile.startsWith("https")) {
-        imageUrls.add(imageFile);
-        continue;
-      }
-      final file = File(imageFile);
-      final parseFile = ParseFile(file);
-
-      // Upload image to server
-      var response = await parseFile.save();
-      if (response.success) {
-        var fileUrl = (response.result as ParseFile).url;
-        imageUrls.add(fileUrl!);
-      } else {
-        print('Failed to upload image: ${response.error?.message}');
-      }
-    }
-
-    return imageUrls;
-  }
-
-  Future<bool> updateRealEstate(RealEstate realEstate) async {
-    try {
-      // 1. Convert to ParseObject
-      final parseObject = await realEstate.realEstateToParseObject(realEstate);
-
-      // 2. Execute update
-      final response = await parseObject.save();
-
-      if (!response.success) {
-        throw Exception('Update failed: ${response.error?.message}');
-      }
-
-      await uploadImages(realEstate.gallary ?? []);
-      print('Successfully updated object: ${response.result.objectId}');
-      return true;
-    } catch (e) {
-      print('Update error: $e');
-      rethrow;
+      throw Exception('Failed to save data: ${res.error?.message}');
     }
   }
 
@@ -102,35 +57,37 @@ class Api {
       if (!response.success) {
         throw Exception('Delete failed: ${response.error?.message}');
       }
-      print('Successfully deleted object: $objectId');
+      CustomToast.showToast('تم حذف العقار');
       return true;
     } catch (e) {
-      print('Delete error: $e');
+      CustomToast.showToast('Delete error: $e');
       rethrow;
     }
   }
 
   Future<bool> updatePropertyWithPermissionCheck(RealEstate realEstate) async {
     try {
-      final galary = await uploadImages(realEstate.gallary ?? []);
-      realEstate.gallary = galary;
-      final ParseCloudFunction function =
-          ParseCloudFunction('updateRealEstate');
-
+      final function = ParseCloudFunction('updateRealEstate');
       final Map<String, dynamic> params =
           (await realEstate.realEstateToParseObject(realEstate)).toJson();
+
+      CustomToast.showToast(
+          "DEBUG: Params sent to cloud function: ${params['gallery'] ?? params['gellary']}");
+      CustomToast.showToast("DEBUG: Full params: $params");
 
       final ParseResponse result = await function.execute(parameters: params);
 
       if (result.success && result.result != null) {
-        print("Response: ${result.result}");
+        CustomToast.showToast("Response: ${result.result}");
+        return true;
       } else {
-        print("Error: ${result.error?.message}");
+        CustomToast.showToast(
+            "Error updating real estate: ${result.error?.message}");
+        return false;
       }
-
-      return true;
     } catch (e) {
-      print(e);
+      CustomToast.showToast(
+          "Exception in updatePropertyWithPermissionCheck: $e");
       return false;
     }
   }

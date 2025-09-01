@@ -1,9 +1,11 @@
-import 'package:aqaraty/enums/enums.dart';
-import 'package:aqaraty/local_data/condition.dart';
-import 'package:aqaraty/local_data/direction.dart';
-import 'package:aqaraty/local_data/furnishing_1.dart';
-import 'package:aqaraty/local_data/property_type.dart';
-import 'package:aqaraty/local_data/types_local.dart';
+import 'package:aqaraty/api/local_data/condition.dart';
+import 'package:aqaraty/api/local_data/currency2.dart';
+import 'package:aqaraty/api/local_data/direction.dart';
+import 'package:aqaraty/api/local_data/furnishing.dart';
+import 'package:aqaraty/api/local_data/property_type.dart';
+import 'package:aqaraty/api/local_data/types_local.dart';
+
+import 'real_estate.dart';
 
 class FilterState {
   final List<PropertyType> selectedPropertyTypes;
@@ -23,7 +25,9 @@ class FilterState {
   final bool? isWithSofa;
   final bool? isOffice;
 
-  FilterState({
+  final Currency? currency;
+
+  const FilterState({
     this.selectedPropertyTypes = const [],
     this.selectedConditions = const [],
     this.selectedFurnishings = const [],
@@ -38,6 +42,7 @@ class FilterState {
     this.isWithSalon,
     this.isWithSofa,
     this.isOffice,
+    this.currency,
   });
 
   FilterState copyWith({
@@ -52,9 +57,10 @@ class FilterState {
     int? maxArea,
     int? minRooms,
     int? maxRooms,
-    bool? isWithSalon,
-    bool? isWithSofa,
-    bool? isOffice,
+    dynamic isWithSalon = unset,
+    dynamic isWithSofa = unset,
+    dynamic isOffice = unset,
+    Currency? currency,
   }) {
     return FilterState(
       selectedPropertyTypes:
@@ -69,9 +75,11 @@ class FilterState {
       maxArea: maxArea ?? this.maxArea,
       minRooms: minRooms ?? this.minRooms,
       maxRooms: maxRooms ?? this.maxRooms,
-      isWithSalon: isWithSalon ?? this.isWithSalon,
-      isWithSofa: isWithSofa ?? this.isWithSofa,
-      isOffice: isOffice ?? this.isOffice,
+      isWithSalon:
+          isWithSalon is Unset ? this.isWithSalon : isWithSalon as bool?,
+      isWithSofa: isWithSofa is Unset ? this.isWithSofa : isWithSofa as bool?,
+      isOffice: isOffice is Unset ? this.isOffice : isOffice as bool?,
+      currency: currency ?? this.currency,
     );
   }
 }

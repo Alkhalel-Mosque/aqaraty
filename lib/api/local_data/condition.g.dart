@@ -8,7 +8,7 @@ part of 'condition.dart';
 
 class ConditionAdapter extends TypeAdapter<Condition> {
   @override
-  final int typeId = 4;
+  final int typeId = 20;
 
   @override
   Condition read(BinaryReader reader) {

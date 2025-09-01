@@ -5,13 +5,12 @@ class MyComboBox extends StatefulWidget {
   final String hint;
   final String? text;
   final List<String> items;
-  final bool enabled;
+
   final void Function(String?)? onChanged;
   const MyComboBox({
     super.key,
     required this.text,
     required this.items,
-    this.enabled = true,
     this.hint = 'اضغط للاختيار',
     this.onChanged,
   });
@@ -23,13 +22,15 @@ class MyComboBox extends StatefulWidget {
 class _MyComboBoxState extends State<MyComboBox> {
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return dropdown.DropdownMenu(
       expandedInsets: const EdgeInsets.all(0),
       initialSelection: widget.text,
       label: Text(
         widget.hint,
-        style: TextStyle(
-          color: Theme.of(context).colorScheme.primary,
+        style: theme.textTheme.bodySmall?.copyWith(
+          fontSize: 16,
+          color: theme.colorScheme.outline,
         ),
       ),
       inputDecorationTheme: InputDecorationTheme(
@@ -37,14 +38,17 @@ class _MyComboBoxState extends State<MyComboBox> {
         filled: true,
         fillColor: Theme.of(context).colorScheme.surfaceContainer,
         border: const OutlineInputBorder(
-            borderSide: BorderSide.none,
-            borderRadius: BorderRadius.all(Radius.circular(15))),
+            borderRadius: BorderRadius.all(
+          Radius.circular(15),
+        )),
       ),
       width: MediaQuery.of(context).size.width / 2,
       menuHeight: MediaQuery.of(context).size.height / 2,
       hintText: widget.hint,
-      enabled: widget.enabled,
-      textStyle: const TextStyle(),
+      textStyle: theme.textTheme.bodySmall?.copyWith(
+        fontSize: 16,
+        color: theme.colorScheme.outline,
+      ),
       dropdownMenuEntries: widget.items
           .map((e) => dropdown.DropdownMenuEntry(value: e, label: e))
           .toList(),

@@ -1,21 +1,81 @@
+import 'dart:io';
+
 import 'package:aqaraty/api/api.dart';
+import 'package:aqaraty/image/data/repositories/image_repository_impl.dart';
+import 'package:aqaraty/api/local_data/currency2.dart';
+
+import 'package:aqaraty/image/data/repositories/service.dart';
+
+import 'package:aqaraty/image/domain/usecase.dart/upload_image.dart';
+
 import 'package:aqaraty/models/real_estate.dart';
 import 'package:aqaraty/models/user.dart';
+import 'package:aqaraty/plugins/preferences_service.dart';
 import 'package:aqaraty/utils/toast.dart';
-import 'package:connectivity_plus/connectivity_plus.dart';
+
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:parse_server_sdk_flutter/parse_server_sdk_flutter.dart';
 
 class CoreProvider extends ChangeNotifier {
+  UploadImage repo =
+      UploadImage(ImageRepositoryImpl(imageService: ImageService()));
+
   User? user;
   ParseUser? parseUser;
   Api api = Api();
   List<RealEstate> realEstates = [];
+  ThemeMode themeMode = ThemeMode.system;
+  final _prefs = PreferencesService();
+  bool isDark = false;
+  Map<Currency, double> exchangeRates = {
+    Currency.USD: 1.0,
+    Currency.SYP: 15000.0, // قيمة افتراضية
+  };
+
+  CoreProvider() {
+    _loadExchangeRates();
+    loadTheme();
+  }
+
+  Future<void> _loadExchangeRates() async {
+    final sypRate = await _prefs.getDouble("syp_rate") ?? 15000.0;
+    exchangeRates[Currency.SYP] = sypRate;
+    notifyListeners();
+  }
+
+  Future<void> updateExchangeRate(Currency currency, double rate) async {
+    exchangeRates[currency] = rate;
+    await _prefs.setDouble("${currency.name.toLowerCase()}_rate", rate);
+    notifyListeners();
+  }
+
+  int? convertPrice(int? price, Currency? from, Currency to) {
+    if (price == null || from == null) return null;
+    final baseInUsd = price / exchangeRates[from]!;
+    return (baseInUsd * exchangeRates[to]!).round();
+  }
+
+  Future<void> loadTheme() async {
+    final saved = await _prefs.getDarkMode();
+
+    isDark = saved;
+    themeMode = isDark ? ThemeMode.dark : ThemeMode.light;
+    notifyListeners();
+  }
+
+  Future<void> toggleTheme(bool value) async {
+    await _prefs.setDarkMode(value);
+
+    isDark = value;
+    themeMode = isDark ? ThemeMode.dark : ThemeMode.light;
+    notifyListeners();
+  }
+
   Future getCashedUser() async {
     final ParseUser? currentUser = await ParseUser.currentUser();
     parseUser = currentUser;
-    print(currentUser);
+
     if (currentUser != null) {
       user = User.userFromParseUser(currentUser);
     } else {
@@ -28,13 +88,22 @@ class CoreProvider extends ChangeNotifier {
     // try {
     final res = await api.fetchAllItems();
     realEstates = res;
-    print("fetchAllItems===================================");
 
-    print("items from API: $res");
     notifyListeners();
     // } catch (e) {
     //   print(e);
     // }
+  }
+
+  /// تحديث عقار محدد من السيرفر
+  Future<void> refreshRealEstate(String realEstateId) async {
+    try {
+      final res = await api.fetchAllItems();
+      realEstates = res;
+      notifyListeners();
+    } catch (e) {
+      CustomToast.showToast('خطأ في تحديث البيانات: $e');
+    }
   }
 
   addRealEstate(RealEstate realEstate) async {
@@ -52,17 +121,32 @@ class CoreProvider extends ChangeNotifier {
     }
   }
 
-  newupdateRealEstate(RealEstate realEstate) async {
+  Future<bool> newupdateRealEstate(RealEstate realEstate) async {
     try {
-      final res = await api.updatePropertyWithPermissionCheck(realEstate);
-      realEstates.removeWhere(
-        (e) => e.id == realEstate.id,
-      );
-      realEstates.add(realEstate);
-      notifyListeners();
-      return res;
+      final parseObject = await realEstate.realEstateToParseObject(realEstate);
+      final response = await parseObject.save();
+
+      if (response.success) {
+        final updatedObject = response.results?.first as ParseObject;
+
+        final gallery = updatedObject.get<List<dynamic>>('gellary') ?? [];
+
+        final index = realEstates.indexWhere((e) => e.id == realEstate.id);
+        if (index != -1) {
+          realEstates[index] =
+              realEstate.copyWith(galleryImageIds: gallery.cast<String>());
+          notifyListeners();
+        }
+
+        // ✅ Update Hive cache with the latest data
+        final box = await Hive.openBox<RealEstate>('real_estates_cache');
+        await box.put(realEstate.id, realEstates[index]);
+
+        return true;
+      }
+      return false;
     } catch (e) {
-      CustomToast.showToast(e.toString());
+      CustomToast.showToast('خطأ في التحديث: $e');
       return false;
     }
   }
@@ -80,46 +164,105 @@ class CoreProvider extends ChangeNotifier {
 
   Future<void> fullLogout() async {
     try {
-      // 1. Clear current user session
       final response = await parseUser!.logout();
 
-      // 2. Verify logout was successful
       if (response.success) {
         await getCashedUser();
       } else {
-        print('Logout failed: ${response.error}');
+        CustomToast.showToast('Logout failed: ${response.error}');
       }
 
-      // 3. Clear any local cached data (optional)
-      await ParseCoreData().getStore().clear(); // Clears all local storage
+      await ParseCoreData().getStore().clear();
     } catch (e) {
-      print('Logout error: $e');
+      CustomToast.showToast('Logout error: $e');
     }
   }
 
-  void listenToConnectivityAndSync() {
-    Connectivity()
-        .onConnectivityChanged
-        .listen((ConnectivityResult result) async {
-      if (result != ConnectivityResult.none) {
-        final box = Hive.box<RealEstate>('pending_real_estates');
+  Future<void> syncPendingProperties() async {
+    try {
+      final box = await Hive.openBox<RealEstate>('pending_real_estates');
+      final properties = box.values.toList();
 
-        final toUpload = box.values.toList();
-        for (var realEstate in toUpload) {
-          try {
-            bool res = await addRealEstate(realEstate);
-            if (res) {
-              final key = box.keyAt(box.values.toList().indexOf(realEstate));
-              await box.delete(key);
+      for (final property in properties) {
+        try {
+          // نفذ رفع الصور والعقار
+          final updatedProperty = await uploadPropertyWithImages(property);
 
-              CustomToast.showToast(
-                  "✅ تم رفع العقار المحفوظ: ${realEstate.customerName}");
-            }
-          } catch (e) {
-            CustomToast.showToast("❌ فشل في الرفع: $e");
-          }
+          await box.delete(property.key);
+        } catch (e) {
+          CustomToast.showToast("❌ فشل مزامنة العقار ${property.id}: $e");
         }
       }
-    });
+    } catch (e) {
+      CustomToast.showToast('❌ خطأ عام في المزامنة: $e');
+    }
+  }
+
+  Future<RealEstate> uploadPropertyWithImages(RealEstate property) async {
+    final uploadedUrls = <String>[];
+
+    final localPaths = [
+      ...?property.localGalleryImagePaths,
+      ...?property.galleryImageIds
+          ?.where((id) => id.startsWith("file://"))
+          .map((id) => id.replaceFirst("file://", "")),
+    ];
+
+    if (localPaths.isNotEmpty) {
+      for (final path in localPaths) {
+        try {
+          final file = File(path);
+          if (await file.exists()) {
+            final url = await repo(file.path);
+            if (url != null) {
+              uploadedUrls.add(url);
+            } else {
+              CustomToast.showToast("❌ فشل رفع الصورة: $path");
+              throw Exception('فشل في رفع الصورة');
+            }
+          } else {
+            CustomToast.showToast("⚠️ الملف غير موجود محليًا: $path");
+          }
+        } catch (e) {
+          CustomToast.showToast('❌ خطأ في رفع الصورة $path: $e');
+          rethrow;
+        }
+      }
+    } else {
+      CustomToast.showToast("ℹ️ لا توجد صور محلية للرفع.");
+    }
+
+    final updatedProperty = property.copyWith(
+      galleryImageIds: {
+        ...?property.galleryImageIds?.where((id) => id.startsWith("http")),
+        ...uploadedUrls,
+      }.toList(),
+      localGalleryImagePaths: null,
+    );
+
+    final success = property.id == null
+        ? await addRealEstate(updatedProperty)
+        : await newupdateRealEstate(updatedProperty);
+
+    if (success) {
+      final box = await Hive.openBox<RealEstate>('real_estates_cache');
+      await box.put(updatedProperty.id, updatedProperty);
+
+      for (final path in localPaths) {
+        try {
+          final file = File(path);
+          if (await file.exists()) {
+            await file.delete();
+          }
+        } catch (e) {
+          CustomToast.showToast('❌ خطأ في حذف الملف المحلي: $path - $e');
+        }
+      }
+    } else {
+      CustomToast.showToast('❌ فشل رفع العقار: ${property.id}');
+      throw Exception('فشل في رفع العقار');
+    }
+
+    return updatedProperty;
   }
 }

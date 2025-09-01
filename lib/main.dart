@@ -1,12 +1,14 @@
-import 'package:aqaraty/local_data/condition.dart';
-import 'package:aqaraty/local_data/direction.dart';
-import 'package:aqaraty/local_data/features.dart';
-import 'package:aqaraty/local_data/furnishing_1.dart';
-import 'package:aqaraty/local_data/latlng_adapter.dart';
-import 'package:aqaraty/local_data/ownershipType.dart';
-import 'package:aqaraty/local_data/property_type.dart';
-import 'package:aqaraty/local_data/request_status.dart';
-import 'package:aqaraty/local_data/types_local.dart';
+import 'package:aqaraty/api/local_data/condition.dart';
+import 'package:aqaraty/api/local_data/currency2.dart';
+import 'package:aqaraty/api/local_data/direction.dart';
+import 'package:aqaraty/api/local_data/features.dart';
+import 'package:aqaraty/api/local_data/furnishing.dart';
+import 'package:aqaraty/api/local_data/latlng_adapter.dart';
+import 'package:aqaraty/api/local_data/ownershipType.dart';
+import 'package:aqaraty/api/local_data/property_type.dart';
+import 'package:aqaraty/api/local_data/request_status.dart';
+import 'package:aqaraty/api/local_data/types_local.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:aqaraty/models/real_estate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive/hive.dart';
@@ -24,6 +26,7 @@ void main() async {
 
 Future<void> initialServer() async {
   WidgetsFlutterBinding.ensureInitialized();
+
   final dir = await getApplicationDocumentsDirectory();
   await Hive.initFlutter(dir.path);
   Hive.registerAdapter(TypesAdapter());
@@ -37,14 +40,16 @@ Future<void> initialServer() async {
   Hive.registerAdapter(FeaturesAdapter());
   Hive.registerAdapter(RequestStatusAdapter());
   Hive.registerAdapter(LatLngAdapter());
+  Hive.registerAdapter(CurrencyAdapter());
 
   await Hive.openBox<RealEstate>('real_estates');
+
   await Hive.openBox<RealEstate>('pending_real_estates');
 
   const keyApplicationId = 'hhfftwGWHUZ4xDgoEveepbg8D25dUZqMDQJtvRp7';
   const keyClientKey = 'FOGdXmYSVKCLvyWFahPPUad64IgiLKAORrg68Z5G';
   const keyParseServerUrl = 'https://parseapi.back4app.com';
-
+  await SharedPreferences.getInstance();
   await Parse().initialize(
     keyApplicationId,
     keyParseServerUrl,

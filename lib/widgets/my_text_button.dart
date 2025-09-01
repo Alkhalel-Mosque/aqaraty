@@ -16,25 +16,25 @@ class CustomTextButton extends StatelessWidget {
   final Widget? widget;
   @override
   Widget build(BuildContext context) {
-    final usedColor = color ?? Theme.of(context).colorScheme.primary;
+    final usedColor = Theme.of(context);
     return TextButton.icon(
         style: ButtonStyle(
           iconColor: WidgetStatePropertyAll(color),
-          backgroundColor: WidgetStatePropertyAll(usedColor.withOpacity(0.2)),
+          backgroundColor: WidgetStatePropertyAll(usedColor.focusColor),
           shape: WidgetStatePropertyAll(
             RoundedRectangleBorder(
               side: BorderSide.none,
               borderRadius: BorderRadius.circular(15),
             ),
           ),
-          overlayColor: WidgetStatePropertyAll(usedColor.withOpacity(0.3)),
+          overlayColor: WidgetStatePropertyAll(usedColor.focusColor),
         ),
         onPressed: onPressed,
         icon: widget,
         label: Text(
           text,
           style: TextStyle(
-            color: usedColor,
+            color: usedColor.cardColor,
             fontSize: 18,
             fontWeight: FontWeight.bold,
           ),

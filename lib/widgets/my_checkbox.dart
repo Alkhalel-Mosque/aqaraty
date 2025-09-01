@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 class MyCheckBox extends StatelessWidget {
-  final bool val;
+  final bool isoffice;
+  final bool? val;
   final String text;
   final bool editable;
   final Color? color;
@@ -19,6 +20,7 @@ class MyCheckBox extends StatelessWidget {
     this.leading,
     this.color,
     this.editable = true,
+    this.isoffice = true,
   });
   @override
   Widget build(BuildContext context) {
@@ -32,18 +34,28 @@ class MyCheckBox extends StatelessWidget {
       child: CheckboxListTile(
         value: val,
         enabled: editable,
-        contentPadding: EdgeInsets.only(right: 10),
+        contentPadding: const EdgeInsets.only(right: 10),
 
-        activeColor: Colors.transparent,
+        activeColor: theme.focusColor,
         // fillColor: const WidgetStatePropertyAll(Colors.transparent),
-        checkColor: theme.colorScheme.primary,
+        checkColor: Colors.black,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(15),
         ),
-        title: Text(
-          text,
-          style: TextStyle(color: color, fontWeight: FontWeight.bold),
-        ),
+        title: isoffice
+            ? FittedBox(
+                fit: BoxFit.cover,
+                child: Text(
+                  text,
+                  style: TextStyle(
+                      color: color, fontWeight: FontWeight.bold, fontSize: 15),
+                ),
+              )
+            : Text(
+                text,
+                style: TextStyle(
+                    color: color, fontWeight: FontWeight.bold, fontSize: 15),
+              ),
         secondary: leading,
         subtitle: subtitle,
         onChanged: (v) {

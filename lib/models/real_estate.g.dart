@@ -23,13 +23,13 @@ class RealEstateAdapter extends TypeAdapter<RealEstate> {
       locationArea: fields[3] as String?,
       locationMark: fields[4] as String?,
       condition: fields[14] as Condition?,
-      price: fields[5] as int,
+      price: fields[5] as int?,
       floor: fields[6] as int?,
       coords: fields[26] as LatLng?,
-      rooms: fields[7] as int,
-      iswithRoof: fields[9] as bool,
-      iswithSalon: fields[8] as bool,
-      iswithSofa: fields[10] as bool,
+      rooms: fields[7] as int?,
+      iswithRoof: fields[9] as bool?,
+      iswithSalon: fields[8] as bool?,
+      iswithSofa: fields[10] as bool?,
       area: fields[11] as int?,
       direction: (fields[12] as List?)?.cast<Direction>(),
       ownershipType: fields[13] as OwnershipType?,
@@ -41,17 +41,19 @@ class RealEstateAdapter extends TypeAdapter<RealEstate> {
       isOffice: fields[20] as bool,
       features: (fields[21] as List?)?.cast<Features>(),
       additionalInformation: fields[22] as String?,
-      gallary: (fields[23] as List?)?.cast<String>(),
+      galleryImageIds: (fields[23] as List?)?.cast<String>(),
       createdById: fields[24] as String?,
       createdAt: fields[27] as DateTime?,
       requestStatus: fields[25] as RequestStatus?,
+      localGalleryImagePaths: (fields[28] as List?)?.cast<String>(),
+      currency: fields[29] as Currency?,
     );
   }
 
   @override
   void write(BinaryWriter writer, RealEstate obj) {
     writer
-      ..writeByte(28)
+      ..writeByte(30)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -99,7 +101,7 @@ class RealEstateAdapter extends TypeAdapter<RealEstate> {
       ..writeByte(22)
       ..write(obj.additionalInformation)
       ..writeByte(23)
-      ..write(obj.gallary)
+      ..write(obj.galleryImageIds)
       ..writeByte(24)
       ..write(obj.createdById)
       ..writeByte(25)
@@ -107,7 +109,11 @@ class RealEstateAdapter extends TypeAdapter<RealEstate> {
       ..writeByte(26)
       ..write(obj.coords)
       ..writeByte(27)
-      ..write(obj.createdAt);
+      ..write(obj.createdAt)
+      ..writeByte(28)
+      ..write(obj.localGalleryImagePaths)
+      ..writeByte(29)
+      ..write(obj.currency);
   }
 
   @override

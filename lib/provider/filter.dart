@@ -1,9 +1,9 @@
-import 'package:aqaraty/enums/enums.dart';
-import 'package:aqaraty/local_data/condition.dart';
-import 'package:aqaraty/local_data/direction.dart';
-import 'package:aqaraty/local_data/furnishing_1.dart';
-import 'package:aqaraty/local_data/property_type.dart';
-import 'package:aqaraty/local_data/types_local.dart';
+import 'package:aqaraty/api/local_data/condition.dart';
+import 'package:aqaraty/api/local_data/currency2.dart';
+import 'package:aqaraty/api/local_data/direction.dart';
+import 'package:aqaraty/api/local_data/furnishing.dart';
+import 'package:aqaraty/api/local_data/property_type.dart';
+import 'package:aqaraty/api/local_data/types_local.dart';
 import 'package:aqaraty/models/filter.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -13,7 +13,7 @@ final filterProvider =
 });
 
 class FilterNotifier extends StateNotifier<FilterState> {
-  FilterNotifier() : super(FilterState());
+  FilterNotifier() : super(const FilterState());
 
   void updatePropertyTypes(List<PropertyType> types) {
     state = state.copyWith(selectedPropertyTypes: types);
@@ -59,7 +59,11 @@ class FilterNotifier extends StateNotifier<FilterState> {
     state = state.copyWith(isOffice: value);
   }
 
+  void updateCurrency(Currency? currency) {
+    state = state.copyWith(currency: currency);
+  }
+
   void resetFilters() {
-    state = FilterState();
+    state = const FilterState();
   }
 }
