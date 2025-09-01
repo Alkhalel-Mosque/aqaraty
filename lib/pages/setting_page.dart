@@ -3,6 +3,7 @@ import 'package:aqaraty/provider/notifiers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:iconsax/iconsax.dart';
+import 'package:intl/intl.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 class SettingsPage extends ConsumerStatefulWidget {
@@ -89,7 +90,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                                   ),
                                   ListTile(
                                     leading: Icon(Icons.phone),
-                                    title: Text("+963 999 888 777"),
+                                    title: Text("963937915453+ "),
                                   ),
                                 ],
                               ),
@@ -105,7 +106,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                   leading:
                       const Icon(Iconsax.dollar_circle, color: Colors.orange),
                   title: const Text("سعر صرف الليرة مقابل الدولار"),
-                  subtitle: Text("الحالي: ${core.exchangeRates[Currency.SYP]}"),
+                  subtitle: Text(
+                      "الحالي: ${NumberFormat.decimalPattern().format(core.exchangeRates[Currency.SYP])}"),
                   onTap: () {
                     showDialog(
                       context: context,

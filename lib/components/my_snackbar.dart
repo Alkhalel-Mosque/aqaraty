@@ -5,7 +5,6 @@ class MySnackBar {
   static showMySnackBar(
     String content, {
     ContentType? contentType,
-    String? title,
   }) {
     Fluttertoast.cancel();
     Fluttertoast.showToast(

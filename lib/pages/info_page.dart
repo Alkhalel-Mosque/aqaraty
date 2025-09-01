@@ -2,21 +2,22 @@ import 'dart:io';
 
 import 'package:aqaraty/components/back_ground_effict.dart';
 import 'package:aqaraty/components/image_pick.dart';
+import 'package:aqaraty/components/my_snackbar.dart';
 
 import 'package:aqaraty/pages/add_page.dart';
 import 'package:aqaraty/provider/image.dart';
 import 'package:aqaraty/provider/notifiers.dart';
 import 'package:aqaraty/router/router.dart';
+import 'package:aqaraty/utils/toast.dart';
 import 'package:aqaraty/widgets/info_page_widget.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 import 'package:iconsax/iconsax.dart';
 import 'package:aqaraty/components/my_map.dart';
 import 'package:aqaraty/models/real_estate.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:intl/intl.dart';
 
 class InfoPage extends ConsumerStatefulWidget {
   final RealEstate realEstate;
@@ -47,15 +48,23 @@ class _InfoPageState extends ConsumerState<InfoPage> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final coreProvRead = ref.read(coreProvider);
-    final imagesState =
-        ref.watch(imagesProvider(widget.realEstate.id.toString()));
+    final coreProvRead = ref.watch(coreProvider);
+
+    // ✅ الحصول على العقار المحدث من CoreProvider بدلاً من widget.realEstate
+    final realEstate = coreProvRead.realEstates.firstWhere(
+      (e) => e.id == widget.realEstate.id,
+      orElse: () => widget.realEstate, // fallback إلى البيانات الأصلية
+    );
+
+    final imagesState = ref.watch(imagesProvider(realEstate.id.toString()));
 
     final serverImages =
         imagesState.initialUrls.where((url) => url.startsWith("http")).toList();
 
+// الصور الجديدة (ملفات)
     final localFiles = imagesState.compressedFiles;
 
+// الصور المخزنة أوفلاين (file://) لازم تعتبر كملفات محلية
     final offlineImages = imagesState.initialUrls
         .where((url) => url.startsWith("file://"))
         .map((path) => File(path.replaceFirst("file://", "")))
@@ -91,13 +100,26 @@ class _InfoPageState extends ConsumerState<InfoPage> {
             child: IconButton(
               icon: const Icon(Iconsax.edit),
               onPressed: () async {
-                await context.myPush(AddPage(
-                  realEstate: widget.realEstate,
-                ));
-                // ✅ تحديث حالة الصور بعد العودة من التعديل
-                ref.invalidate(imagesProvider(widget.realEstate.id.toString()));
-                // ✅ إعادة تحميل البيانات من CoreProvider
-                ref.read(coreProvider).featchData();
+                try {
+                  final isconected = await ref
+                      .read(imagesProvider(realEstate.id.toString()).notifier)
+                      .checkConnectivity();
+                  if (isconected) {
+                    await context.myPush(AddPage(
+                      realEstate: realEstate,
+                    ));
+                    await ref.read(coreProvider).featchData();
+
+                    ref
+                        .read(imagesProvider(realEstate.id.toString()).notifier)
+                        .refreshFromCore();
+                  } else {
+                    MySnackBar.showMySnackBar('لا يوجد اتصال بالانترنت',
+                        contentType: ContentType.warning);
+                  }
+                } catch (e) {
+                  CustomToast.showToast('لا يوجد اتصال بالانترنت $e');
+                }
               },
             ),
           ),
@@ -118,7 +140,7 @@ class _InfoPageState extends ConsumerState<InfoPage> {
                       [
                         EnhancedImageCompressor(
                           isShow: true,
-                          realEstateId: widget.realEstate.id.toString(),
+                          realEstateId: realEstate.id.toString(),
                           isEdit: false,
                           onFilePicked: (List<File> files) {},
                         ),
@@ -128,49 +150,41 @@ class _InfoPageState extends ConsumerState<InfoPage> {
                     "المعلومات الأساسية",
                     [
                       infoBox(
-                        widget.realEstate,
+                        realEstate,
                         Iconsax.user,
                         "منشئ الطلب",
                         coreProvRead.user?.username ?? "-",
                         false,
                       ),
-                      infoBox(widget.realEstate, Iconsax.verify, "الإكساء",
-                          widget.realEstate.condition?.arName ?? "-", false),
-                      infoBox(
-                          widget.realEstate,
-                          Iconsax.add_square,
-                          "نوع الإضافة",
-                          widget.realEstate.type?.arNameTitle ?? "-",
-                          false),
-                      infoBox(
-                          widget.realEstate,
-                          Iconsax.buildings,
-                          "نوع العقار",
-                          widget.realEstate.propertyType?.arName ?? "-",
-                          false),
+                      infoBox(realEstate, Iconsax.verify, "الإكساء",
+                          realEstate.condition?.arName ?? "-", false),
+                      infoBox(realEstate, Iconsax.add_square, "نوع الإضافة",
+                          realEstate.type?.arNameTitle ?? "-", false),
+                      infoBox(realEstate, Iconsax.buildings, "نوع العقار",
+                          realEstate.propertyType?.arName ?? "-", false),
                     ],
                     context),
                 const SizedBox(height: 12),
                 cardSection(
                     "الموقع",
                     [
-                      infoBox(widget.realEstate, Iconsax.location, "الموقع",
-                          widget.realEstate.locationArea ?? "-", false),
-                      if (widget.realEstate.coords != null)
+                      infoBox(realEstate, Iconsax.location, "الموقع",
+                          realEstate.locationArea ?? "-", false),
+                      if (realEstate.coords != null)
                         ClipRRect(
                           borderRadius: BorderRadius.circular(12),
                           child: SizedBox(
                             height: 200,
                             child: MyMap(
                               isEdite: false,
-                              coords: widget.realEstate.coords,
+                              coords: realEstate.coords,
                               onSave: (_) {},
                             ),
                           ),
                         ),
-                      if ((widget.realEstate.locationMark ?? "").isNotEmpty)
-                        infoBox(widget.realEstate, Iconsax.flag, "علامة",
-                            widget.realEstate.locationMark ?? "-", false),
+                      if ((realEstate.locationMark ?? "").isNotEmpty)
+                        infoBox(realEstate, Iconsax.flag, "علامة",
+                            realEstate.locationMark ?? "-", false),
                     ],
                     context),
                 const SizedBox(height: 12),
@@ -178,72 +192,60 @@ class _InfoPageState extends ConsumerState<InfoPage> {
                     "تفاصيل العقار",
                     [
                       infoBox(
-                          widget.realEstate,
+                          realEstate,
                           Iconsax.money,
                           "السعر المتوقع",
-                          "${widget.realEstate.price} ${widget.realEstate.currency?.symbol}",
+                          "${NumberFormat.decimalPattern().format(realEstate.price ?? 0)} ${realEstate.currency?.symbol ?? ''}",
                           false),
-                      infoBox(widget.realEstate, Iconsax.maximize_4, "المساحة",
-                          "${widget.realEstate.area ?? '-'}", false),
-                      infoBox(widget.realEstate, Iconsax.setting4, "الطابق",
-                          ordinalsAr(widget.realEstate.floor) ?? "-", false),
-                      infoBox(widget.realEstate, Iconsax.house_2, "عدد الغرف",
-                          "${widget.realEstate.rooms}", true),
-                      infoBox(widget.realEstate, Iconsax.designtools, " الفرش",
-                          "${widget.realEstate.furnishing?.arName}", false),
-                      infoBox(widget.realEstate, Iconsax.ram, " الملكية",
-                          "${widget.realEstate.ownershipType?.arName}", false),
+                      infoBox(realEstate, Iconsax.maximize_4, "المساحة",
+                          "${realEstate.area ?? '-'}", false),
+                      infoBox(realEstate, Iconsax.setting4, "الطابق",
+                          ordinalsAr(realEstate.floor) ?? "-", false),
+                      infoBox(realEstate, Iconsax.house_2, "عدد الغرف",
+                          "${realEstate.rooms}", true),
+                      infoBox(realEstate, Iconsax.designtools, " الفرش",
+                          "${realEstate.furnishing?.arName}", false),
+                      infoBox(realEstate, Iconsax.ram, " الملكية",
+                          "${realEstate.ownershipType?.arName}", false),
                     ],
                     context),
                 cardSection(
                     'تفاصيل الزبون ',
                     [
-                      infoBox(
-                          widget.realEstate,
-                          Iconsax.profile_2user,
-                          'اسم الزبون',
-                          "${widget.realEstate.customerName}",
-                          false),
+                      infoBox(realEstate, Iconsax.profile_2user, 'اسم الزبون',
+                          "${realEstate.customerName}", false),
                       infoBoxWithActions(context, Iconsax.call, 'رقم الزبون',
-                          widget.realEstate.customerPhone.toString()),
+                          realEstate.customerPhone.toString()),
                     ],
                     context),
-                if ((widget.realEstate.officeName ?? "").isNotEmpty ||
-                    (widget.realEstate.officePhone ?? "").isNotEmpty)
+                if ((realEstate.officeName ?? "").isNotEmpty ||
+                    (realEstate.officePhone ?? "").isNotEmpty)
                   cardSection(
                       'تفاصيل المكتب ',
                       [
-                        infoBox(
-                            widget.realEstate,
-                            Iconsax.profile_2user,
-                            'اسم المكتب',
-                            "${widget.realEstate.officeName}",
-                            false),
+                        infoBox(realEstate, Iconsax.profile_2user, 'اسم المكتب',
+                            "${realEstate.officeName}", false),
                         infoBoxWithActions(context, Iconsax.call, 'رقم المكتب',
-                            widget.realEstate.officePhone.toString()),
+                            realEstate.officePhone.toString()),
                       ],
                       context),
-                if ((widget.realEstate.additionalInformation ?? "").isNotEmpty)
+                if ((realEstate.additionalInformation ?? "").isNotEmpty)
                   cardSection(
                       'ملاحظة',
                       [
-                        infoBox(
-                            widget.realEstate,
-                            Iconsax.note,
-                            'معلومات اضافية ',
-                            "${widget.realEstate.additionalInformation}",
-                            false)
+                        infoBox(realEstate, Iconsax.note, 'معلومات اضافية ',
+                            "${realEstate.additionalInformation}", false)
                       ],
                       context),
-                if (widget.realEstate.iswithSalon == false ||
-                    widget.realEstate.iswithSofa == false ||
-                    widget.realEstate.iswithRoof == false ||
-                    (widget.realEstate.direction ?? []).isNotEmpty ||
-                    (widget.realEstate.features ?? []).isNotEmpty)
+                if (realEstate.iswithSalon == false ||
+                    realEstate.iswithSofa == false ||
+                    realEstate.iswithRoof == false ||
+                    (realEstate.direction ?? []).isNotEmpty ||
+                    (realEstate.features ?? []).isNotEmpty)
                   cardSection(
                       "المميزات الإضافية",
                       [
-                        if ((widget.realEstate.direction ?? []).isNotEmpty) ...[
+                        if ((realEstate.direction ?? []).isNotEmpty) ...[
                           Text(
                             "الاتجاهات:",
                             style: theme.textTheme.bodySmall?.copyWith(
@@ -255,8 +257,13 @@ class _InfoPageState extends ConsumerState<InfoPage> {
                           Wrap(
                             spacing: 8,
                             runSpacing: 6,
-                            children: widget.realEstate.direction!
+                            children: realEstate.direction!
                                 .map((d) => Chip(
+                                      side: BorderSide(
+                                          width: 0.7, color: theme.focusColor),
+                                      surfaceTintColor: theme.cardColor,
+                                      color: WidgetStateProperty.all(
+                                          theme.cardColor),
                                       label: Text(d.arName),
                                       backgroundColor: theme.cardColor,
                                     ))
@@ -264,7 +271,7 @@ class _InfoPageState extends ConsumerState<InfoPage> {
                           ),
                           const SizedBox(height: 10),
                         ],
-                        if ((widget.realEstate.features ?? []).isNotEmpty) ...[
+                        if ((realEstate.features ?? []).isNotEmpty) ...[
                           Text(
                             "الميزات:",
                             style: theme.textTheme.bodySmall?.copyWith(
@@ -276,9 +283,15 @@ class _InfoPageState extends ConsumerState<InfoPage> {
                           Wrap(
                             spacing: 8,
                             runSpacing: 6,
-                            children: widget.realEstate.features!
+                            children: realEstate.features!
                                 .map((f) => Chip(
+                                      side: BorderSide(
+                                          width: 0.7, color: theme.focusColor),
+                                      surfaceTintColor: theme.cardColor,
+                                      color: WidgetStateProperty.all(
+                                          theme.cardColor),
                                       label: Text(f.arName),
+                                      shadowColor: theme.cardColor,
                                       backgroundColor: theme.cardColor,
                                     ))
                                 .toList(),

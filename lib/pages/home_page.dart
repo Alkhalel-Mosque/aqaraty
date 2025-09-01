@@ -161,7 +161,7 @@ class _HomePageState extends ConsumerState<HomePage> {
     if (isLoading) {
       return Center(
           child: CircularProgressIndicator(
-        color: Theme.of(context).cardColor,
+        color: Theme.of(context).canvasColor,
       ));
     }
 

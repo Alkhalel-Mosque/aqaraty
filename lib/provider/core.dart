@@ -129,16 +129,18 @@ class CoreProvider extends ChangeNotifier {
       if (response.success) {
         final updatedObject = response.results?.first as ParseObject;
 
+        // الحصول على المعرض الحالي من العقار المحدث
         final gallery = updatedObject.get<List<dynamic>>('gellary') ?? [];
 
+        // البحث عن العقار في القائمة المحلية وتحديثه
         final index = realEstates.indexWhere((e) => e.id == realEstate.id);
         if (index != -1) {
-          realEstates[index] =
-              realEstate.copyWith(galleryImageIds: gallery.cast<String>());
+          // استخدام الصور المحدثة من السيرفر مباشرة
+          realEstates[index] = realEstate.copyWith(galleryImageIds: gallery.cast<String>());
           notifyListeners();
         }
 
-        // ✅ Update Hive cache with the latest data
+        // ✅ تحديث التخزين المحلي مع أحدث البيانات
         final box = await Hive.openBox<RealEstate>('real_estates_cache');
         await box.put(realEstate.id, realEstates[index]);
 
@@ -232,11 +234,14 @@ class CoreProvider extends ChangeNotifier {
       CustomToast.showToast("ℹ️ لا توجد صور محلية للرفع.");
     }
 
+    // دمج الصور القديمة مع الجديدة بدلاً من الاستبدال
+    final existingImages = property.galleryImageIds
+            ?.where((id) => id.startsWith("http"))
+            .toList() ??
+        [];
+
     final updatedProperty = property.copyWith(
-      galleryImageIds: {
-        ...?property.galleryImageIds?.where((id) => id.startsWith("http")),
-        ...uploadedUrls,
-      }.toList(),
+      galleryImageIds: [...existingImages, ...uploadedUrls],
       localGalleryImagePaths: null,
     );
 

@@ -86,6 +86,7 @@ class ImagesNotifier extends StateNotifier<ImagesState> {
   void confirmDeletion() {
     final sortedIndices = [...state.pendingDeletion]
       ..sort((a, b) => b.compareTo(a));
+    print('=====================$sortedIndices');
 
     List<String> newInitialUrls = [...state.initialUrls];
     List<File> newCompressedFiles = [...state.compressedFiles];
@@ -100,6 +101,7 @@ class ImagesNotifier extends StateNotifier<ImagesState> {
         final compIndex = index - state.initialUrls.length;
         if (compIndex >= 0 && compIndex < state.compressedFiles.length) {
           newCompressedFiles.removeAt(compIndex);
+          print('==========================$compIndex');
         }
       }
     }
@@ -118,12 +120,10 @@ class ImagesNotifier extends StateNotifier<ImagesState> {
 
     state = state.copyWith(
       initialUrls: serverImages,
+      compressedFiles: [],
       deletedImageIds: [],
       pendingDeletion: [],
     );
-    print(state.deletedImageIds);
-
-    print(state.compressedFiles);
   }
 
   List<dynamic> get allItems =>
@@ -200,6 +200,49 @@ class ImagesNotifier extends StateNotifier<ImagesState> {
     return saved;
   }
 
+  /// مزامنة تلقائية مع العقار
+  void _syncWithRealEstate() {
+    final realEstate = ref
+        .read(coreProvider)
+        .realEstates
+        .firstWhere((e) => e.id.toString() == realEstateId);
+
+    final newInitialImages =
+        (realEstate.localGalleryImagePaths?.isNotEmpty ?? false)
+            ? realEstate.localGalleryImagePaths!
+            : (realEstate.galleryImageIds ?? []);
+
+    // ✅ لو تغيرت الصور، نحدث الحالة
+    if (newInitialImages.toString() != state.initialUrls.toString()) {
+      state = state.copyWith(initialUrls: newInitialImages);
+    }
+  }
+
+  /// استدعاء يدوي للمزامنة (مثلاً بعد حفظ العقار)
+  void refresh() => _syncWithRealEstate();
+
+  /// تحديث حالة الصور من البيانات المحدثة في CoreProvider
+  void refreshFromCore() {
+    try {
+      final realEstate = ref
+          .read(coreProvider)
+          .realEstates
+          .firstWhere((e) => e.id.toString() == realEstateId);
+
+      final updatedImages = realEstate.galleryImageIds ?? [];
+      
+      // تحديث الحالة مع الصور الجديدة
+      state = state.copyWith(
+        initialUrls: updatedImages,
+        compressedFiles: [],
+        deletedImageIds: [],
+        pendingDeletion: [],
+      );
+    } catch (e) {
+      // إذا لم يتم العثور على العقار، لا نفعل شيئاً
+      print('Real estate not found for refresh: $realEstateId');
+    }
+  }
   Future<bool> uploadOnline(
       RealEstate realEstate, List<File> newlyPickedImages) async {
     final imagesNotifier =
@@ -214,27 +257,39 @@ class ImagesNotifier extends StateNotifier<ImagesState> {
         return false;
       }
 
+      // ✅ اجمع الصور الموجودة أصلاً
+      final existingGallery = [...?realEstate.galleryImageIds];
+
+      // ✅ ارفع الصور الجديدة
+      List<String> uploadedUrls = [];
       if (newlyPickedImages.isNotEmpty) {
-        updated =
-            await realEstate.uploadGalleryImages(imageRepo, newlyPickedImages);
+        for (final file in newlyPickedImages) {
+          final url = await imageRepo(file.path); // ترفع وترجع رابط
+          if (url != null) {
+            uploadedUrls.add(url);
+          }
+        }
       }
 
-      if (deletedImageIds.isNotEmpty) {
-        updated = updated.copyWith(
-          galleryImageIds: updated.galleryImageIds
-                  ?.where((id) => !deletedImageIds.contains(id))
-                  .toSet()
-                  .toList() ??
-              [],
-        );
-      }
+      // ✅ دمج القديم + الجديد (مع حذف الصور المحددة)
+      final mergedGallery = [
+        ...existingGallery.where((id) => !deletedImageIds.contains(id)),
+        ...uploadedUrls,
+      ].toSet().toList(); // toSet() لتفادي التكرار
 
-      final success = realEstate == null
+      // ✅ حدث العقار بالقائمة الجديدة
+      updated = updated.copyWith(galleryImageIds: mergedGallery);
+
+      // ✅ احفظ التغييرات في السيرفر
+      final success = realEstate.id == null
           ? await ref.read(coreProvider).addRealEstate(updated)
           : await ref.read(coreProvider).newupdateRealEstate(updated);
 
       if (success) {
-        imagesNotifier.clearDeleted();
+        // ✅ تحديث حالة الصور مع الصور الجديدة المرفوعة
+        imagesNotifier.setInitialUrls(mergedGallery, override: true);
+        imagesNotifier.clearDeleted(); // فضي قائمة المحذوف
+        imagesNotifier.clearLocalImages(); // مسح الصور المحلية المؤقتة
       }
 
       return success;
