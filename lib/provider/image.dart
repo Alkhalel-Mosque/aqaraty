@@ -118,7 +118,6 @@ class ImagesNotifier extends StateNotifier<ImagesState> {
 
     state = state.copyWith(
       initialUrls: serverImages,
-      compressedFiles: [],
       deletedImageIds: [],
       pendingDeletion: [],
     );

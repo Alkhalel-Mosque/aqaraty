@@ -54,10 +54,8 @@ class _InfoPageState extends ConsumerState<InfoPage> {
     final serverImages =
         imagesState.initialUrls.where((url) => url.startsWith("http")).toList();
 
-// الصور الجديدة (ملفات)
     final localFiles = imagesState.compressedFiles;
 
-// الصور المخزنة أوفلاين (file://) لازم تعتبر كملفات محلية
     final offlineImages = imagesState.initialUrls
         .where((url) => url.startsWith("file://"))
         .map((path) => File(path.replaceFirst("file://", "")))
