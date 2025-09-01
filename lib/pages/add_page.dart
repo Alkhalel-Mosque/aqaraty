@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:aqaraty/components/back_ground_effict.dart';
 import 'package:aqaraty/components/image_pick.dart';
 import 'package:aqaraty/components/map_view.dart';
 import 'package:aqaraty/components/my_map.dart';
@@ -11,14 +14,19 @@ import 'package:aqaraty/local_data/property_type.dart';
 import 'package:aqaraty/local_data/request_status.dart';
 import 'package:aqaraty/local_data/types_local.dart';
 import 'package:aqaraty/models/user.dart';
+
 import 'package:aqaraty/provider/notifiers.dart';
-import 'package:aqaraty/router/router.dart';
-import 'package:aqaraty/widgets/my_autocomplete.dart';
-import 'package:connectivity_plus/connectivity_plus.dart';
+
+import 'package:aqaraty/widgets/details_widget.dart';
+import 'package:aqaraty/widgets/direction_widget.dart';
+import 'package:aqaraty/widgets/features_widget.dart';
+import 'package:aqaraty/widgets/map_view.dart';
+
+import 'package:aqaraty/widgets/personal_info.dart';
+import 'package:aqaraty/widgets/save_data_helper.dart';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:hive/hive.dart';
-import '../../enums/enums.dart';
+
 import '../../extensions/extension.dart';
 import '../../models/real_estate.dart';
 import '../../utils/toast.dart';
@@ -42,10 +50,11 @@ class AddPage extends ConsumerStatefulWidget {
 }
 
 class _AddPageState extends ConsumerState<AddPage> {
+  List<File> _newlyPickedImages = [];
   User? createdByUser;
-  bool editable = true;
 
-  // Position? _currentPosition;
+  bool _isLoading = false;
+
   RealEstate realEstate = RealEstate(
     direction: [],
     features: [],
